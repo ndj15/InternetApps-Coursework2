@@ -9,8 +9,7 @@ var userFitnessData = new Schema({
   date: Number,
   steps:Number,
   caloriesBurned:Number,
-  numberOfExecises: Number,
-  durationOfExercise:Number
+  exercise:Number
 });
 
 // Creates a collection based on a specific structure

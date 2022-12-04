@@ -89,11 +89,7 @@ app1.post('/signUp/createUser',function(req,res){
     }) 
 })
 
-app1.get('/user/fitness',function(req,res){
-    res.sendFile(path.join(__dirname, 'fitness.html.html'))
 
-
-})
 
 app1.get('/user/wellness',function(req,res){
     res.sendFile(path.join(__dirname, 'MentalHealth.html'))
@@ -111,52 +107,131 @@ app1.get('user/wellness/submitWellnessData',function(req,res){
 
 })
 
-app1.get('/users/getFitness',function(req,res){
-    fitness.findOne({email:userEmail},function(err,data){
-        if(err){
-            console.log(err)
+
+app1.post('/user/fitness/submitFitnessData',function(req,res){
+    var date = new Date()
+    fetch('http://localhost:9999/user/getFitnessData')
+    .then((response)=>{ // database empty?
+        return response.text()
+    }).then((data)=>{// if entry exists
+        console.log('data:' + data)
+         if(data.length > 1){
+            return data
         }else{
-            res.send(data)
+            return false
+
         }
+        
+    }).then((text)=>{ // if there is an entry for today 
+        if(text != false){
+            console.log('entry for today already exists or you have not made your first entry')
+            console.log(JSON.parse(text))
+            return true
+        }else{
+            
+            return 
+        }
+        
+    }).then((data)=>{
+        if(data != true){
+            var values = []
+            values[0] = req.body.stepCount
+            values[1] = req.body.calBurned
+            values[2] = req.body.exercise
+            return values
+            
+        }else{
+            return false
+
+        }
+        
+         // turn into useable numbers from json
+          }).then((data)=>{
+            if (data != false){
+               fitness.create({
+                email:userEmail,
+                date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString(),
+                steps: data[0],
+                caloriesBurned: data[1],
+                exercise: data[2]
+    
+                        })
+
+                    
+                res.redirect('http://localhost:9999/user/fitness')}
+            else{
+
+                res.send('already submitted')
+
+            }
+    }).catch((err)=>{
+
+        console.log(err)
     })
+
+
+
+
+
 })
 
 
+app1.get('/user/getFitnessData',function(req,res){
+        var date = new Date()
+            fitness.findOne({email:userEmail,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
+            if(err){
+                console.log(err)
+            }else{
+                res.send(data)
+            }
+        })})
 
-/*
+
+
 app1.get('/user/fitness',function(req,res){
-    fetch('http://localhost:9999/users/getFitness')
+    fetch('http://localhost:9999/user/getFitnessData')
     .then((data)=>{
-        return data.json()
-    }).then((object) =>{
+        return data.text()
 
-        const steps = parseInt(JSON.stringify(object.steps)) // turn into useable numbers from json
-        const caloriesBurned = parseInt(JSON.stringify(object.caloriesBurned))
-        const numberOfExecises = parseInt(JSON.stringify(object.numberOfExecises))
-        const durationOfExercise = parseInt(JSON.stringify(object.durationOfExercise))
-        var values = []
-        values[0] = steps
-        values[1] = caloriesBurned
-        values[2] = numberOfExecises
-        values[3] = durationOfExercise
-        return values
-}).then((d)=>{
-        console.log(d)
-        res.render('fitness.ejs',{
-            numOfMeals: d[0],
-            calInt:d[1],
-            alcCon:d[2],
-        })
-    return
+    }).then((text)=>{
+        if(text.length > 1){
+            return JSON.parse(text)
+        }
+        else{
+
+            return 'false'
+        }
+        
+    }).then((data)=>{
+        if(data != 'false'){
+            res.render('fitness.ejs',{
+                steps: data.steps,
+                calories: data.caloriesBurned,
+                exercise:data.exercise
+            })
+            return
+        }else{
+            res.render('fitness.ejs',{
+                steps: "Not Submitted Today",
+                calories:"Not Submitted Today" ,
+                exercise:"Not Submitted Today",
+            })
+        }
     
-}).catch(err=>{
+})
+
+.catch(err=>{
 
     console.log(err)
 
 })
 
+
 })
-*/
+
+
+
+
 
 //return entry in table with email and today's date
 app1.get('/user/getDietData',function(req,res){
@@ -211,13 +286,7 @@ app1.get('/user/diet',function(req,res){
 
 })
 
-app1.get('/databaseStatus',function(req,res){
-     
 
-
-
-
-})
 
 app1.post('/user/diet/submitDietData',function(req,res){
     var date = new Date()

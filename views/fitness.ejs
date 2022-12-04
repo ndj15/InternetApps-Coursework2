@@ -4,8 +4,9 @@
     
     <head>
     <meta charset ="UTF-8"/>
-    <title>Your Diet</title>
+    <title>Your Fitness</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+        <script src="express.js"></script>
     </head>
 
 
@@ -28,16 +29,16 @@
         </nav>
         <main>
 
-                <h1 class="heading text-center mb-5">Your Diet</h1>
+                <h1 class="heading text-center mb-5">Your Fitness</h1>
 
 
             <div class="row justify-content-center" >
                     <div class="col-4">
                             <h3 class="heading text-center">Your Summary</h3>
                             <ul class="list-group justify-content-center" style="list-style:none;">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">Number of Meals: <span> <%=numOfMeals%> </span></li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">Calorie Intake: <span> <%=calInt%></span></li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">Alcohol consumed:<span> <%=alcCon%> </span></li>        
+                                <li class="list-group-item d-flex justify-content-between align-items-center">Steps: <span> <%=steps%> </span></li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">Calories Burned: <span> <%=calories%></span></li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">Active Minutes<span> <%=exercise%> </span></li>        
                             </ul>
                     </div>
     
@@ -45,15 +46,16 @@
                         
                     <div class="col-4">
                             <h3 class="title text-center">Log Your Diet</h3>
-                            <form action="http://localhost:9999/user/diet/submitDietData" method="POST">
-                                <label for="meals" class="form-label">Number of Meals</label>
-                                <input type="number" class="form-control" id="numberOfMeals" name="mealNo" placeholder="4" required>
-                                    
-                                <label for="calories" class="form-label">Total Daily Calories</label>
-                                <input type="number" class="form-control" id="calories" name="calInt" placeholder="1900" required>
+                            <form action="http://localhost:9999/user/fitness/submitFitnessData" method="POST">
+                            <label for="stepCount" class="form-label">Step Count</label>
+                            <input type="number" class="form-control" id="stepCount" name="stepCount" placeholder="5000">
+                                  
+                            <label for="calBurned" class="form-label">Calories Burned </label>
+                            <input type="number" class="form-control" id="calBurned" name="calBurned" placeholder="300">
 
-                                <label for="alcoholCon" class="form-label">Alcohol Consumed( Units)</label>
-                                <input type="number" class="form-control" id="Alcohol" name='alcCon' placeholder="3" required>
+                            <label for="exercise" class="form-label">Active Minutes</label>
+                            <input type="number" class="form-control" id="exercise" name="exercise" placeholder="2">
+                                  
                                 <input class="btn btn-info" role="button" type="submit"> 
                             </form>
                     </div>
