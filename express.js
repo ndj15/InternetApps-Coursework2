@@ -108,6 +108,27 @@ app1.get('user/wellness/submitWellnessData',function(req,res){
 })
 
 
+app1.post('/user/wellness/submitWellnessData')
+
+
+app1.get('/user/getWellness',function(req,res){
+
+
+
+
+
+
+})
+
+app1.get('/user/wellness',function(req,res){
+
+
+
+
+
+})
+
+
 app1.post('/user/fitness/submitFitnessData',function(req,res){
     var date = new Date()
     fetch('http://localhost:9999/user/getFitnessData')

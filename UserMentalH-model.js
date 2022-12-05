@@ -6,9 +6,10 @@ var Schema = mongoose.Schema;
 // concrete collection structure
 var userMentalData = new Schema({
   email:String,
-  date: Date,
+  date: Number,
   rating:Number,
   sleepHrs:Number,
+  social:Number,
   
 });
 
