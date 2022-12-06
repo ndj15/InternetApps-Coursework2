@@ -90,40 +90,122 @@ app1.post('/signUp/createUser',function(req,res){
 })
 
 
+app1.get('/user/getWellnessData',function(req,res){
+            var date = new Date()
+            wellness.findOne({email:userEmail,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
+            if(err){
+                console.log(err)
+            }else{
+                res.send(data)
+            }
+            })
+        })
+
+app1.post('/user/wellness/submitWellnessData',function(req,res){
+    var date = new Date()
+    fetch('http://localhost:9999/user/getWellnessData')
+    .then((response)=>{ // database empty?
+        return response.text()
+    }).then((data)=>{// if entry exists
+        console.log('data:' + data)
+         if(data){
+            return data
+        }else{
+            return false
+
+        }
+        
+    }).then((text)=>{ // if there is an entry for today 
+        if(text != false){
+            console.log('entry for today already exists or you have not made your first entry')
+            console.log(JSON.parse(text))
+            return true
+        }else{
+            
+            return 
+        }
+        
+    }).then((data)=>{
+        if(data != true){
+            var values = []
+            values[0] = req.body.rating
+            values[1] = req.body.sleep
+            values[2] = req.body.social
+            return values
+            
+        }else{
+            return false
+
+        }
+        
+         // turn into useable numbers from json
+          }).then((data)=>{
+            if (data != false){
+               wellness.create({
+                email:userEmail,
+                date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString(),
+                rating: data[0],
+                sleepHrs: data[1],
+                social: data[2]
+    
+                        })
+
+                    
+                res.redirect('http://localhost:9999/user/wellness')}
+            else{
+
+                res.send('already submitted')
+
+            }
+    }).catch((err)=>{
+
+        console.log(err)
+    })
+
+})
+
+
+
+
+
 
 app1.get('/user/wellness',function(req,res){
-    res.sendFile(path.join(__dirname, 'MentalHealth.html'))
+    fetch('http://localhost:9999/user/getWellnessData')
+    .then((data)=>{
+        return data.text()
 
+    }).then((text)=>{
+        if(text.length > 1){
+            return JSON.parse(text)
+        }
+        else{
+
+            return 'false'
+        }
+        
+    }).then((data)=>{
+        if(data != 'false'){
+            res.render('wellness.ejs',{
+                rating: data.rating,
+                sleepHrs: data.sleepHrs,
+                social:data.social
+            })
+            return
+        }else{
+            res.render('wellness.ejs',{
+                rating: "Not Submitted Today",
+                sleepHrs:"Not Submitted Today" ,
+                social:"Not Submitted Today",
+            })
+        }
+    
+})
+
+.catch(err=>{
+
+    console.log(err)
 
 })
-app1.get('user/wellness/submitWellnessData',function(req,res){
-    wellness.create({
-        //email:// NEED TO FIND WAY TO INSERT EMAIL
-         //: req.query.mealQuant,
-         //:req.query.calories,
-         //:req.query.units
-     })
-
-
-})
-
-
-app1.post('/user/wellness/submitWellnessData')
-
-
-app1.get('/user/getWellness',function(req,res){
-
-
-
-
-
-
-})
-
-app1.get('/user/wellness',function(req,res){
-
-
-
 
 
 })
