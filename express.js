@@ -10,7 +10,7 @@ const x = require('util')
 app1.use(express.static('/'))
 
 
-var userEmail = "test@t.com"
+const userEmail = "test@t.com"
 
 const users = require('./Users.model.js')
 const dietData = require('./userDiet-model.js');
@@ -163,9 +163,6 @@ app1.post('/user/wellness/submitWellnessData',function(req,res){
     })
 
 })
-
-
-
 
 
 
@@ -332,10 +329,6 @@ app1.get('/user/fitness',function(req,res){
 
 })
 
-
-
-
-
 //return entry in table with email and today's date
 app1.get('/user/getDietData',function(req,res){
     var date = new Date()
@@ -350,6 +343,7 @@ app1.get('/user/getDietData',function(req,res){
 
 
 app1.get('/user/diet',function(req,res){
+    console.log(userEmail)
     fetch('http://localhost:9999/user/getDietData')
     .then((data)=>{
         return data.text()
@@ -365,20 +359,66 @@ app1.get('/user/diet',function(req,res){
         
     }).then((data)=>{
         if(data != 'false'){
+
+           /* res.render('diet.ejs',{
+                numOfMeals: data.mealNo,
+                calInt: data.calIntake,
+                alcCon:data.alcConsumed,
+                link:'https://www.nhs.uk/'
+            })*/
+            return data
+        }else{
+            
+            return false
+        }
+    
+}).then(data=>{
+
+    if(data != false){
+        
+        if(data.calIntake < 1000){
+            
+            res.render('diet.ejs',{
+                    numOfMeals: data.mealNo,
+                    calInt: data.calIntake,
+                    alcCon:data.alcConsumed,
+                    link:'https://www.nhs.uk/conditions/malnutrition/'
+                })
+        }else if(data.calIntake > 2800){
             res.render('diet.ejs',{
                 numOfMeals: data.mealNo,
                 calInt: data.calIntake,
-                alcCon:data.alcConsumed
+                alcCon:data.alcConsumed,
+                link:'https://www.healthline.com/nutrition/how-to-stop-overeating#TOC_TITLE_HDR_3'
             })
-            return
-        }else{
+
+
+        }else if(data.calIntake>= 1000 && data.calIntake < 2800){
+
             res.render('diet.ejs',{
+                numOfMeals: data.mealNo,
+                calInt: data.calIntake,
+                alcCon:data.alcConsumed,
+                link:'https://www.nia.nih.gov/health/maintaining-healthy-weight'
+            })
+
+
+            
+        }}
+    else{
+        res.render('diet.ejs',{
                 numOfMeals: "Not Submitted Today",
                 calInt:"Not Submitted Today" ,
                 alcCon:"Not Submitted Today",
+                link:'http://localhost:9999/user/diet'
+                
             })
-        }
+
+    }
     
+
+
+
 })
 
 .catch(err=>{
@@ -453,13 +493,6 @@ app1.post('/user/diet/submitDietData',function(req,res){
     })
 })
 
-        
-        
-
-
-
-
-
 app1.post('/logIn/request',function(req,res){
 
  users.findOne({email:req.body.email},function(error,data){
@@ -481,7 +514,7 @@ app1.post('/logIn/request',function(req,res){
                             res.send("incorrect password, try again")
                             }
                             else {
-
+                                this.userEmail = req.body.email
                                 res.sendFile(path.join(__dirname,'YourHealth.html'))
                              
 
@@ -503,23 +536,6 @@ app1.post('/logIn/request',function(req,res){
 
 })
 })
-
-app1.post('user/mentalHealth/submitMentalHealth',function(req,res){
-    console.log('hello you are here')
-    mentalHealth.create({
-        rating: req.query.rating,
-        sleepHrs:req.query.sleepRating
-    })
-    console.log('Upload complete')
-
-})
-/*
-app1.post('/user/fitness/submitFitness',function(req,res){
-
-
-
-})
-*/
 
 
 
