@@ -49,8 +49,8 @@
                             <label for="password" class="form-label">Password</label>
                             <input type="password" name="password" class="form-control" onchange="passCheck()" id="password" placeholder="Password" required>
 
-                            <label for="passConfirm" class="form-label">Confirm Password</label>
-                            <input type="password" name ="passwordCheck"class="form-control" id="passConfirm" placeholder="Confirm Password" required>
+                            <label for="passConfirm" id="passConfirmLabel" class="form-label">Confirm Password</label>
+                            <input type="password" name ="passwordCheck"class="form-control" id="passConfirm" onchange="passMatch()" placeholder="Confirm Password" required>
                             
                             <input class="btn btn-info" role="button" type="submit"></a> 
                         </form>
