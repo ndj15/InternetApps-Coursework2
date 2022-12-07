@@ -43,19 +43,8 @@ function databaseInsert(formEmail,formFname,formLname,formPassword){
 }
 
 
-app1.get('/',function(req,res){
-    res.sendFile(path.join(__dirname,'index.html'))
 
 
-})
-
-app1.get('/logIn',function(req,res){
-    res.sendFile(path.join(__dirname,'LogIn.html'))
-})
-
-app1.get('/signUp',function(req,res){
-    res.sendFile(path.join(__dirname,'Sign up.html'))
-})
 
 
 
