@@ -35,26 +35,26 @@
             <div class="container-lg mt-5">
 
                 <h1  class="title text-center"> Sign upto Healthy-Life!</h1>
-                <h5 id="error" class="text-center"></h5>
+              
                 <div class="row justify-content-center">
                     <div class="col-6">
                         <form id='signUpForm' action="http://localhost:9999/signUp/createUser" method="POST">
-                            <label for="email" class="form-label">Email Address</label>
+                            <label for="email" id="emailLabel" class="form-label">Email Address</label>
                           
                             <input type="email" class="form-control" name ='email' id="email" placeholder="Example@HealthyLife.com" >
 
                             <label for="fName" class="form-label">First Name</label>
-                            <input type="text" name="fName" id="fName" class="form-control" placeholder="First Name" required>
+                            <input type="text" name="fName" id="fName" class="form-control" placeholder="First Name">
 
                             <label for="sName" class="form-label">Second Name</label>
-                            <input type="text" name ="lName" class="form-control" id="sName" placeholder="Second name" required>
+                            <input type="text" name ="lName" class="form-control" id="sName" placeholder="Second name">
                                   
                             <label for="password" id='passwordLabel'class="form-label">Password</label>
                 
-                            <input type="password" name="password" class="form-control" onchange="passCheck()" id="password" placeholder="Password" required>
+                            <input type="password" name="password" class="form-control" onchange="passCheck()" id="password" placeholder="Password">
 
                             <label for="passConfirm" id="passConfirmLabel" class="form-label">Confirm Password</label>
-                            <input type="password" name ="passwordCheck"class="form-control" id="passConfirm" onchange="passMatch()" placeholder="Confirm Password" required>
+                            <input type="password" name ="passwordCheck"class="form-control" id="passConfirm" onchange="passMatch()" placeholder="Confirm Password" >
                             
                             <input class="btn btn-info" id="submitBtn" role="button" type="submit"></a> 
                         </form>

@@ -21,6 +21,7 @@ const { json } = require('express');
 const { validate } = require('./userDiet-model.js');
 const { resolveCaa } = require('dns');
 const { rejects } = require('assert');
+const { link } = require('fs');
 
 var port = 9999;
 
@@ -41,11 +42,6 @@ function databaseInsert(formEmail,formFname,formLname,formPassword){
     })
     console.log('complete')
 }
-
-
-
-
-
 
 
 
@@ -80,15 +76,84 @@ app1.post('/signUp/createUser',function(req,res){
 
 
 app1.get('/user/getWellnessData',function(req,res){
-            var date = new Date()
-            wellness.findOne({email:userEmail,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
-            if(err){
-                console.log(err)
-            }else{
-                res.send(data)
+    var date = new Date()
+        wellness.findOne({email:userEmail,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
+        if(err){
+            console.log(err)
+        }else{
+            res.send(data)
+        }
+    })})
+
+
+ app1.get('/user/wellness',function(req,res){
+        fetch('http://localhost:9999/user/getWellnessData')
+        .then((data)=>{
+            return data.text()
+    
+        }).then((text)=>{
+            if(text.length > 1){//if there is a value
+        
+                return JSON.parse(text)
+            }
+            else{
+               
+                return false
+            }
+            
+        }).then((data)=>{
+    
+            if(data != false){// if there is data
+                    console.log(data)
+                    if(data.social < 5){
+                        
+                        res.render('wellness.ejs',{
+                                rating: data.rating,
+                                sleepHrs: data.sleepHrs,
+                                social:data.social,
+            
+                            })
+                    }else if(data.social > 5){
+                        res.render('wellness.ejs',{
+                            rating: data.rating,
+                            sleepHrs: data.sleepHrs,
+                            social:data.social,
+        
+                        })
+
+                    }
+                    
+                    /*else if(data.rating > 5){
+                        res.render('wellness.ejs',{
+                            rating: data.rating,
+                            sleepHrs: data.sleepHrs,
+                            social:data.social,
+                            
+                        })
+            
+            
+                    }
+                */ }
+            else{
+                res.render('wellness.ejs',{
+                    rating: "Not Submitted for today",
+                    sleepHrs: "Not Submitted for today",
+                    social:"Not Submitted for today"
+
+                })
+
+
             }
             })
-        })
+                
+               
+    .catch(err=>{
+    
+        console.log(err)
+    
+    })
+    
+    })
 
 app1.post('/user/wellness/submitWellnessData',function(req,res){
     var date = new Date()
@@ -97,7 +162,7 @@ app1.post('/user/wellness/submitWellnessData',function(req,res){
         return response.text()
     }).then((data)=>{// if entry exists
         console.log('data:' + data)
-         if(data){
+         if(data.length > 1){
             return data
         }else{
             return false
@@ -106,12 +171,11 @@ app1.post('/user/wellness/submitWellnessData',function(req,res){
         
     }).then((text)=>{ // if there is an entry for today 
         if(text != false){
-            console.log('entry for today already exists or you have not made your first entry')
             console.log(JSON.parse(text))
             return true
         }else{
             
-            return 
+            return false
         }
         
     }).then((data)=>{
@@ -129,6 +193,7 @@ app1.post('/user/wellness/submitWellnessData',function(req,res){
         
          // turn into useable numbers from json
           }).then((data)=>{
+            console.log(data)
             if (data != false){
                wellness.create({
                 email:userEmail,
@@ -140,62 +205,104 @@ app1.post('/user/wellness/submitWellnessData',function(req,res){
                         })
 
                     
-                res.redirect('http://localhost:9999/user/wellness')}
+                res.redirect('http://localhost:9999/user/wellness')
+            }
             else{
 
-                res.send('already submitted')
+                res.render('submitted.ejs',{
+                    previousPage: 'http://localhost:9999/user/wellness'
+
+                })
 
             }
     }).catch((err)=>{
 
         console.log(err)
     })
-
 })
 
-
-
-app1.get('/user/wellness',function(req,res){
-    fetch('http://localhost:9999/user/getWellnessData')
-    .then((data)=>{
-        return data.text()
-
-    }).then((text)=>{
-        if(text.length > 1){
-            return JSON.parse(text)
+app1.get('/user/getFitnessData',function(req,res){
+    var date = new Date()
+        fitness.findOne({email:userEmail,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
+        if(err){
+            console.log(err)
+        }else{
+            res.send(data)
         }
-        else{
+    })})
 
-            return 'false'
+
+ app1.get('/user/fitness',function(req,res){
+        fetch('http://localhost:9999/user/getFitnessData')
+        .then((data)=>{
+            return data.text()
+    
+        }).then((text)=>{
+            if(text.length > 1){//if there is a value
+             
+                return JSON.parse(text)
+            }
+            else{
+               
+                return false
+            }
+            
+        }).then((data)=>{
+    
+        if(data != false){// if there is data
+            console.log(data)
+            if(data.steps < 1000){
+                
+                res.render('fitness.ejs',{
+                        steps: data.steps,
+                        calories: data.caloriesBurned,
+                        active:data.exercise,
+    
+                    })
+            }else if(data.steps > 2800){
+                res.render('fitness.ejs',{
+                    steps: data.steps,
+                    calories: data.caloriesBurned,
+                    active:data.exercise,
+                    
+                })
+    
+    
+            }else if(data.steps>= 1000 ){
+    
+                res.render('fitness.ejs',{
+                    steps: data.steps,
+                    calories: data.caloriesBurned,
+                    active:data.exercise,
+                  
+                })
+    
+    
+                
+            }
         }
         
-    }).then((data)=>{
-        if(data != 'false'){
-            res.render('wellness.ejs',{
-                rating: data.rating,
-                sleepHrs: data.sleepHrs,
-                social:data.social
-            })
-            return
-        }else{
-            res.render('wellness.ejs',{
-                rating: "Not Submitted Today",
-                sleepHrs:"Not Submitted Today" ,
-                social:"Not Submitted Today",
-            })
-        }
+        else{
+            res.render('fitness.ejs',{
+                    steps: "Not Submitted Today",
+                    calories:"Not Submitted Today" ,
+                    active:"Not Submitted Today",
+                
+                    
+                })
+        }})
     
-})
-
-.catch(err=>{
-
-    console.log(err)
-
-})
-
-
-})
-
+    
+    
+    
+    
+    .catch(err=>{
+    
+        console.log(err)
+    
+    })
+    
+    })
 
 app1.post('/user/fitness/submitFitnessData',function(req,res){
     var date = new Date()
@@ -213,12 +320,11 @@ app1.post('/user/fitness/submitFitnessData',function(req,res){
         
     }).then((text)=>{ // if there is an entry for today 
         if(text != false){
-            console.log('entry for today already exists or you have not made your first entry')
             console.log(JSON.parse(text))
             return true
         }else{
             
-            return 
+            return false
         }
         
     }).then((data)=>{
@@ -236,87 +342,34 @@ app1.post('/user/fitness/submitFitnessData',function(req,res){
         
          // turn into useable numbers from json
           }).then((data)=>{
+            console.log(data)
             if (data != false){
                fitness.create({
                 email:userEmail,
                 date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString(),
-                steps: data[0],
-                caloriesBurned: data[1],
-                exercise: data[2]
+                steps: req.body.stepCount,
+                caloriesBurned: req.body.calBurned,
+                exercise: req.body.exercise
     
                         })
 
                     
-                res.redirect('http://localhost:9999/user/fitness')}
+                res.redirect('http://localhost:9999/user/fitness')
+            }
             else{
 
-                res.send('already submitted')
+                res.render('submitted.ejs',{
+                    previousPage: 'http://localhost:9999/user/fitness'
+
+                })
 
             }
     }).catch((err)=>{
 
         console.log(err)
     })
-
-
-
-
-
 })
 
-
-app1.get('/user/getFitnessData',function(req,res){
-        var date = new Date()
-            fitness.findOne({email:userEmail,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
-            if(err){
-                console.log(err)
-            }else{
-                res.send(data)
-            }
-        })})
-
-
-
-app1.get('/user/fitness',function(req,res){
-    fetch('http://localhost:9999/user/getFitnessData')
-    .then((data)=>{
-        return data.text()
-
-    }).then((text)=>{
-        if(text.length > 1){
-            return JSON.parse(text)
-        }
-        else{
-
-            return 'false'
-        }
-        
-    }).then((data)=>{
-        if(data != 'false'){
-            res.render('fitness.ejs',{
-                steps: data.steps,
-                calories: data.caloriesBurned,
-                exercise:data.exercise
-            })
-            return
-        }else{
-            res.render('fitness.ejs',{
-                steps: "Not Submitted Today",
-                calories:"Not Submitted Today" ,
-                exercise:"Not Submitted Today",
-            })
-        }
-    
-})
-
-.catch(err=>{
-
-    console.log(err)
-
-})
-
-
-})
 
 //return entry in table with email and today's date
 app1.get('/user/getDietData',function(req,res){
@@ -332,39 +385,23 @@ app1.get('/user/getDietData',function(req,res){
 
 
 app1.get('/user/diet',function(req,res){
-    console.log(userEmail)
     fetch('http://localhost:9999/user/getDietData')
     .then((data)=>{
         return data.text()
 
     }).then((text)=>{
-        if(text.length > 1){
+        if(text.length > 1){//if there is a value
             return JSON.parse(text)
         }
         else{
 
-            return 'false'
+            return false
         }
         
     }).then((data)=>{
-        if(data != 'false'){
 
-           /* res.render('diet.ejs',{
-                numOfMeals: data.mealNo,
-                calInt: data.calIntake,
-                alcCon:data.alcConsumed,
-                link:'https://www.nhs.uk/'
-            })*/
-            return data
-        }else{
-            
-            return false
-        }
-    
-}).then(data=>{
-
-    if(data != false){
-        
+    if(data != false){// if there is data
+        console.log(data)
         if(data.calIntake < 1000){
             
             res.render('diet.ejs',{
@@ -470,10 +507,14 @@ app1.post('/user/diet/submitDietData',function(req,res){
                         })
 
                     
-                res.redirect('http://localhost:9999/user/diet')}
+                res.redirect('http://localhost:9999/user/diet')
+            }
             else{
 
-                res.send('already submitted')
+                res.render('submitted.ejs',{
+                    previousPage: 'http://localhost:9999/user/diet'
+
+                })
 
             }
     }).catch((err)=>{
