@@ -1,4 +1,4 @@
-
+const em = document.getElementById('emailLabel')
 const form = document.getElementById('signUpForm')
 const email = document.getElementById('email')
 const emailLabel = document.getElementById('emailLabel')
@@ -6,15 +6,21 @@ const password = document.getElementById('password')
 const passwordCheck = document.getElementById('passConfirm')
 const heading = document.getElementById('heading')
 const subBtn = document.getElementById('submitBtn')
-const errormess  = document.getElementById('error')
-errormess.style.color = 'red'
-var error = 0
-
-/*
-
+const errBlank = document.getElementById('blank')
+const errFormat = document.getElementById('emailFormat')
+const errPassLen = document.getElementById('passLength')
+const errMatch = document.getElementById('passMatch')
 
 
-*/ 
+
+
+form.addEventListener('submit',e=>{
+
+    e.preventDefault()
+
+
+})
+
 function passCheck(){
     console.log(password.innerHTML.length)
     if(password.value == ''){
@@ -35,59 +41,33 @@ function passCheck(){
 
 }
 
-function passMatch(){
-
-    if(password.value != passwordCheck.value){
-        console.log("Passwords do not match")
-
-        passConfirmLabel.innerHTML = "Confirm Password PASSWORDS DO NOT MATCH"
-        passConfirmLabel.style.color= 'red'
-    }
-    else{
-        passConfirmLabel.innerHTML = "Confirm Password "
-        passConfirmLabel.style.color = 'green'
-
-    }
-
-
-
-}
-
-function valEmail(email){
-    var charCheck = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
-    return charCheck.test(email)
-
-
-}
-
-
-
-
-form.addEventListener('submit',function(event){
+form.addEventListener('submit',event=>{
     event.preventDefault()
+    if(email.value =='' || password.value ==''| password.value==''){
+        
+        errBlank.innerHTML ='Cannot Leave Email, Password or Confirm Password Blank'
+        errBlank.style.color ='red'
 
-    /*if(email.value =='' || password.value ==''| password.value==''){
-        event.preventDefault()
-        div.appendChild(blankErr)
+    }if(!(valEmail(email.value))){
+        //to be completed
+       
 
 
     }if(password.value.length <= 7){
-        msg+= 'password length has to be 7 or more characters\n'
+        errPassLen.innerHTML = 'Password needs to be longer than 6 characters'
+        errPassLen.style.color ='red'
          
 
 
-    }if(!(valEmail(email.value))){
-
-        msg += 'incorrect Email Form\n'
-        emailLabel.style.color = 'red'
+    }if(password.value != passCheck.value){
+        errMatch.innerHTML = 'Passwords does not match'
+        errMatch.style.color ='red'
 
 
     }else{
 
-        errormess.innerHTML = ''
+        //clear all messages and post
     }
 
+})
 
-*/
-
-})//add function for clicking on button for submit

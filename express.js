@@ -10,7 +10,7 @@ const x = require('util')
 app1.use(express.static('/'))
 
 
-const userEmail = "test@t.com"
+var userEmail = undefined
 
 const users = require('./Users.model.js')
 const dietData = require('./userDiet-model.js');
@@ -72,6 +72,14 @@ app1.post('/signUp/createUser',function(req,res){
 
         }
     }) 
+})
+
+app1.get('/user/yourHealth',function(req,res){
+    console.log(userEmail)
+
+
+
+
 })
 
 
@@ -385,6 +393,7 @@ app1.get('/user/getDietData',function(req,res){
 
 
 app1.get('/user/diet',function(req,res){
+    console.log(userEmail)
     fetch('http://localhost:9999/user/getDietData')
     .then((data)=>{
         return data.text()
@@ -544,9 +553,9 @@ app1.post('/logIn/request',function(req,res){
                             res.send("incorrect password, try again")
                             }
                             else {
-                                this.userEmail = req.body.email
-                                res.sendFile(path.join(__dirname,'YourHealth.html'))
-                             
+                                userEmail = req.body.email
+                                res.sendFile(path.join(__dirname,"YourHealth.html"))
+                                
 
                                     /*res.render('YourHealth',{
                                     numOfMeals: dData.mealNo,
