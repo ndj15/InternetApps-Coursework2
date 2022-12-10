@@ -8,6 +8,9 @@ app1.use(express.json())//middleware that parse post request
 app1.set('view engine', 'ejs')
 const x = require('util')
 app1.use(express.static('/'))
+const cors = require('cors')
+
+app1.use(cors({origin: 'http://127.0.0.1:5500'}))
 
 
 var userEmail = undefined
@@ -81,6 +84,30 @@ app1.get('/user/yourHealth',function(req,res){
 
 
 })
+
+
+app1.get('/emailCheck',function(req,res){
+    users.find({},function(err,data){
+        if(err){
+
+            console.log(err)
+        }else{
+            res.send(data)
+
+        }
+
+
+    })
+
+
+})
+
+
+
+
+
+
+
 
 
 app1.get('/user/getWellnessData',function(req,res){

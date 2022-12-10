@@ -33,20 +33,21 @@
         </nav>
         <main>
             <div class="container-lg mt-5">
-                <div class="row justify-content-center">
+                <div id = 'errorList' class="row justify-content-center">
                 <h1  class="title text-center"> Sign upto Healthy-Life!</h1>
                 <p id="blank" class="text-center"></p>
                 <p id="emailFormat" class="text-center"></p>
-                <p id="passLength" class="text-center"></p>
+                <p id="passLen" class="text-center"></p>
                 <p id="passMatch" class="text-center"></p>
-                <p id=""></p>
+                <p id="emailExist"></p>
+               
             </div>
                 <div class="row justify-content-center">
                     <div class="col-6">
                         <form id='signUpForm' action="http://localhost:9999/signUp/createUser" method="POST">
                             <label for="email" id="emailLabel" class="form-label">Email Address</label>
                           
-                            <input type="email" class="form-control" name ='email' id="email" placeholder="Example@HealthyLife.com" >
+                            <input type="text" class="form-control" name ='email' id="email" placeholder="Example@HealthyLife.com" >
 
                             <label for="fName" class="form-label">First Name</label>
                             <input type="text" name="fName" id="fName" class="form-control" placeholder="First Name">
@@ -56,10 +57,10 @@
                                   
                             <label for="password" id='passwordLabel'class="form-label">Password</label>
                 
-                            <input type="password" name="password" class="form-control" onchange="passCheck()" id="password" placeholder="Password">
+                            <input type="password" name="password" class="form-control"  id="password" placeholder="Password">
 
                             <label for="passConfirm" id="passConfirmLabel" class="form-label">Confirm Password</label>
-                            <input type="password" name ="passwordCheck"class="form-control" id="passConfirm" onchange="passMatch()" placeholder="Confirm Password" >
+                            <input type="password" name ="passwordCheck"class="form-control" id="passConfirm"  placeholder="Confirm Password" >
                             
                             <input class="btn btn-info" id="submitBtn" role="button" type="submit"></a> 
                         </form>
