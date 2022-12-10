@@ -1,7 +1,7 @@
-const em = document.getElementById('emailLabel')
+
 const form = document.getElementById('signUpForm')
 const email = document.getElementById('email')
-const emailLabel = document.getElementById('emailLabel')
+
 const password = document.getElementById('password')
 const passwordCheck = document.getElementById('passConfirm')
 const heading = document.getElementById('heading')
@@ -10,7 +10,7 @@ const errBlank = document.getElementById('blank')
 const errFormat = document.getElementById('emailFormat')
 const errPassLen = document.getElementById('passLen')
 const errMatch = document.getElementById('passMatch')
-
+const errEmailExist = document.getElementById('emailExist')
 
 
 
@@ -19,9 +19,7 @@ const errMatch = document.getElementById('passMatch')
 
 form.addEventListener('submit',event=>{
 
-    event.preventDefault()
     var errCount = 0
-
     if(email.value =='' || password.value ==''| password.value==''){
         
         errBlank.innerHTML ='Cannot Leave Email, Password or Confirm Password Blank'
@@ -44,35 +42,30 @@ form.addEventListener('submit',event=>{
         errFormat.innerHTML = ''
         var req = new XMLHttpRequest()
 
-        req.open('GET','http://localhost:9999/emailCheck', true)
+        req.open('GET','http://localhost:9999/emailCheck', false)
 
         req.onload = function(){
             if(req.status == 200){// if communication was successfull
                 var existingEmail = JSON.parse(this.response)
-
+                var found = false
+                
                 existingEmail.forEach(element => {
-                    console.log(element.email)
-                    console.log(email.value)
-                    if(element.email === email.value){
-                    //email already exists
-                    console.log('yes')
-                    console.log('here')
-                    var emailExistErr = document.createElement('p')
-                    emailExistErr.innerHTML = 'Email already exists. please Log In' + email.value
-                    emailExistErr.style.color = 'red'
-                    
-                    document.getElementById('errorList').appendChild(emailExistErr)
+        
+                    if(element.email == email.value){
+                    found = true
+                }})
 
-                    errCount=+1
 
+                if(found== true){
+                   
+                    errEmailExist.innerHTML = 'An Account is already associated to ' + email.value 
+                    errEmailExist.style.color = 'red'
+                    errCount +=1
 
                 }else{
-                     console.log('no !')
 
+                    errEmailExist.innerHTML = ''
                 }
-
-                });
-                
             }else{
                 console.log('failed')
 
@@ -83,7 +76,7 @@ form.addEventListener('submit',event=>{
 
     }
 
-    if(password.value.length <= 7){
+    if(password.value.length <= 2){
         errPassLen.innerHTML = 'Password needs to be longer than 6 characters'
         errPassLen.style.color ='red'
         errCount+=1
@@ -104,12 +97,12 @@ form.addEventListener('submit',event=>{
         errMatch.innerHTML =''
         //clear all messages and post
     }
-
-   /* if(errCount> 0 ){
-
-        event.preventDefault()
-    }
-
-*/
+    console.log(errCount)
+    
+   if(errCount > 0){
+fhjuyxdfhjuybdsijufbhiuycxdfhjuydsbfhuybdhuysfbydsubdfsuybdydufdsbfuyddyubfysubfyudsbfyubdsfnabdiuasdyuasbdiuasuy
+    event.preventDefault()
+   }
+   
 })
 
