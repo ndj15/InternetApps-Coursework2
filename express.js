@@ -47,6 +47,11 @@ function databaseInsert(formEmail,formFname,formLname,formPassword){
 }
 
 
+app1.get('/', function(req,res){
+
+    res.sendFile(path.join(__dirname,'index.html'))
+
+})
 
 app1.post('/signUp/createUser',function(req,res){
 //email check
@@ -77,14 +82,6 @@ app1.post('/signUp/createUser',function(req,res){
     }) 
 })
 
-app1.get('/user/yourHealth',function(req,res){
-    console.log(userEmail)
-
-
-
-
-})
-
 
 app1.get('/emailCheck',function(req,res){
     users.find({},function(err,data){
@@ -101,14 +98,6 @@ app1.get('/emailCheck',function(req,res){
 
 
 })
-
-
-
-
-
-
-
-
 
 app1.get('/user/getWellnessData',function(req,res){
     var date = new Date()
@@ -581,15 +570,9 @@ app1.post('/logIn/request',function(req,res){
                             }
                             else {
                                 userEmail = req.body.email
-                                res.sendFile(path.join(__dirname,"YourHealth.html"))
+                                res.redirect('http://localhost:9999/user/diet')
                                 
 
-                                    /*res.render('YourHealth',{
-                                    numOfMeals: dData.mealNo,
-                                    calInt: dData.calIntake,
-                                    alcCon: dData.alcConsumed,
-
-                                        */
 
 
                                 }
