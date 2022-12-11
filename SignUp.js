@@ -100,8 +100,11 @@ form.addEventListener('submit',event=>{
     console.log(errCount)
     
    if(errCount > 0){
-fhjuyxdfhjuybdsijufbhiuycxdfhjuydsbfhuybdhuysfbydsubdfsuybdydufdsbfuyddyubfysubfyudsbfyubdsfnabdiuasdyuasbdiuasuy
     event.preventDefault()
+    
+   }else{
+    alert("Successful Sign Up")
+
    }
    
 })

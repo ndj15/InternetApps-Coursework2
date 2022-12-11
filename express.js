@@ -9,6 +9,7 @@ app1.set('view engine', 'ejs')
 const x = require('util')
 app1.use(express.static('/'))
 const cors = require('cors')
+app1.use(express.static('public'))
 
 app1.use(cors({origin: 'http://127.0.0.1:5500'}))
 
@@ -47,11 +48,6 @@ function databaseInsert(formEmail,formFname,formLname,formPassword){
 }
 
 
-app1.get('/', function(req,res){
-
-    res.sendFile(path.join(__dirname,'index.html'))
-
-})
 
 app1.post('/signUp/createUser',function(req,res){
 //email check
@@ -64,7 +60,7 @@ app1.post('/signUp/createUser',function(req,res){
                 if(req.body.password == req.body.passwordCheck){
                     console.log('passwords passed authentication check')
                     databaseInsert(req.body.email, req.body.fName,req.body.lName, req.body.password);
-                    res.sendFile(path.join(__dirname, 'signUpSuccess.html'))
+
                 }
                 
                 else{
@@ -81,7 +77,12 @@ app1.post('/signUp/createUser',function(req,res){
         }
     }) 
 })
+app1.get('/user/index.html',function(req,res){
 
+
+
+
+})
 
 app1.get('/emailCheck',function(req,res){
     users.find({},function(err,data){
@@ -133,7 +134,7 @@ app1.get('/user/getWellnessData',function(req,res){
                     if(data.sleepHrs < 6){// less than 5 and less than 6 hrs sleep
                         res.render('wellness.ejs',{
                             rating: data.rating,
-                            sleepHrs:data.sleephrs ,
+                            sleepHrs:data.sleepHrs ,
                             social:data.social,
                             link1:"https://www.nhs.uk/mental-health/self-help/tips-and-support/how-to-be-happier/",
                             link2:"https://www.healthshots.com/preventive-care/self-care/what-will-happen-if-you-sleep-for-less-than-6-hours/",
@@ -143,7 +144,7 @@ app1.get('/user/getWellnessData',function(req,res){
                     }else{// less than 5 rating but more than 6 hrs sleep
                         res.render('wellness.ejs',{
                             rating: data.rating,
-                            sleepHrs:data.sleephrs ,
+                            sleepHrs:data.sleepHrs ,
                             social:data.social,
                             link1:"https://www.nhs.uk/mental-health/self-help/tips-and-support/how-to-be-happier/",
                             link2:"https://www.cdc.gov/sleep/about_sleep/sleep_hygiene.html",
@@ -153,10 +154,10 @@ app1.get('/user/getWellnessData',function(req,res){
                     }
                 }
                 else{ // rating more than 5
-                    if(data.exercise < 30){// good rating but bad sleep
+                    if(data.sleepHrs < 30){// good rating but bad sleep
                         res.render('wellness.ejs',{
                             rating: data.rating,
-                            sleepHrs:data.sleephrs ,
+                            sleepHrs:data.sleepHrs ,
                             social:data.social,
                             link1:"https://www.healthline.com/health/how-to-be-happy",
                             link2:"https://www.cdc.gov/sleep/about_sleep/sleep_hygiene.html",
@@ -167,7 +168,7 @@ app1.get('/user/getWellnessData',function(req,res){
                     }else{ // good rating and good sleep
                         res.render('wellness.ejs',{
                             rating: data.rating,
-                            sleepHrs:data.sleephrs ,
+                            sleepHrs:data.sleepHrs ,
                             social:data.social,
                             link1:"https://www.healthline.com/health/how-to-be-happy",
                             link2:"https://www.cdc.gov/sleep/about_sleep/sleep_hygiene.html",
@@ -182,9 +183,9 @@ app1.get('/user/getWellnessData',function(req,res){
             
             else{
                 res.render('wellness.ejs',{
-                    rating: data.rating,
-                    sleepHrs:data.sleephrs ,
-                    social:data.social,
+                    rating: "Not Submitted for today",
+                    sleepHrs:"Not Submitted for today",
+                    social:"Not Submitted for today",
                     link1:"",
                     link2:"",
                 

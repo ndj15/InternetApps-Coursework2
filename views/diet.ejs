@@ -13,7 +13,7 @@
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container-fluid">
-                    <a class="navbar-brand" href="index.html">Healthy-Life</a>
+                <p class="navbar-brand" >Healthy-Life</p>
                     <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
                         <li class="nav-item active">
                             <a class="nav-link" href="http://localhost:9999/user/diet">Diet</a>
@@ -48,13 +48,13 @@
                             <h3 class="title text-center">Log Your Diet</h3>
                             <form action="http://localhost:9999/user/diet/submitDietData" method="POST">
                                 <label for="meals" class="form-label">Number of Meals</label>
-                                <input type="number" class="form-control" id="numberOfMeals" name="mealNo" placeholder="4" required>
+                                <input type="number" class="form-control" id="numberOfMeals" name="mealNo" placeholder="4" min= 0 required>
                                     
                                 <label for="calories" class="form-label">Total Daily Calories</label>
-                                <input type="number" class="form-control" id="calories" name="calInt" placeholder="1900" required>
+                                <input type="number" class="form-control" id="calories" name="calInt" placeholder="1900" min =0 required>
 
                                 <label for="alcoholCon" class="form-label">Alcohol Consumed( Units)</label>
-                                <input type="number" class="form-control" id="Alcohol" name='alcCon' placeholder="3" required>
+                                <input type="number" class="form-control" id="Alcohol" name='alcCon' placeholder="3" min = 0 required>
                                 <input class="btn btn-info" role="button" type="submit"> 
                             </form>
                     </div>

@@ -13,7 +13,7 @@
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container-fluid">
-                    <a class="navbar-brand" href="index.html">Healthy-Life</a>
+                <p class="navbar-brand" >Healthy-Life</p>
                     <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
                         <li class="nav-item active">
                             <a class="nav-link" href="http://localhost:9999/user/diet">Diet</a>
@@ -48,13 +48,13 @@
                             <h3 class="title text-center">Log Your Wellness</h3>
                             <form action="http://localhost:9999/user/wellness/submitWellnessData" method="POST">
                             <label for="rating" class="form-label">Today's Rating /10</label>
-                            <input type="number" class="form-control" id="rating" name="rating" placeholder="10">
+                            <input type="number" class="form-control" id="rating" name="rating" min = 0 max = 10 placeholder="10">
                                   
                             <label for="sleep" class="form-label">Hours Slept </label>
-                            <input type="number" class="form-control" id="sleep" name="sleep" placeholder="9">
+                            <input type="number" class="form-control" id="sleep" name="sleep" min = 0 placeholder="9">
 
                             <label for="social" class="form-label">Socialising (hrs)</label>
-                            <input type="number" class="form-control" id="social" name="social" placeholder="2">
+                            <input type="number" class="form-control" id="social" name="social" min = 0 placeholder="2">
                                   
                                 <input class="btn btn-info" role="button" type="submit"> 
                             </form>

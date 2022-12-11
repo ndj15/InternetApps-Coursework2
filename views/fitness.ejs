@@ -13,7 +13,7 @@
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container-fluid">
-                    <a class="navbar-brand" href="index.html">Healthy-Life</a>
+                    <p class="navbar-brand" >Healthy-Life</p>
                     <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
                         <li class="nav-item active">
                             <a class="nav-link" href="http://localhost:9999/user/diet">Diet</a>
@@ -48,13 +48,13 @@
                             <h3 class="title text-center">Log Your Fitness</h3>
                             <form action="http://localhost:9999/user/fitness/submitFitnessData" method="POST">
                             <label for="stepCount" class="form-label">Step Count</label>
-                            <input type="number" class="form-control" id="stepCount" name="stepCount" placeholder="5000" required>
+                            <input type="number" class="form-control" id="stepCount" name="stepCount" min = 0 placeholder="5000" required>
                                   
                             <label for="calBurned" class="form-label">Calories Burned </label>
-                            <input type="number" class="form-control" id="calBurned" name="calBurned" placeholder="300" required>
+                            <input type="number" class="form-control" id="calBurned" name="calBurned" min = 0 placeholder="300" required>
 
                             <label for="exercise" class="form-label">Active Minutes</label>
-                            <input type="number" class="form-control" id="exercise" name="exercise" placeholder="2" required>
+                            <input type="number" class="form-control" id="exercise" name="exercise" min = 0 placeholder="2" required>
                                   
                                 <input class="btn btn-info" role="button" type="submit"> 
                             </form>
