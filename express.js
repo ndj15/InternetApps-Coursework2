@@ -128,50 +128,71 @@ app1.get('/user/getWellnessData',function(req,res){
         }).then((data)=>{
     
             if(data != false){// if there is data
-                    console.log(data)
-                    if(data.social < 5){
+                console.log(data)
+                if(data.rating < 5){//rating less that 5
+                    if(data.sleepHrs < 6){// less than 5 and less than 6 hrs sleep
+                        res.render('fitness.ejs',{
+                            steps: data.steps,
+                            calories:data.caloriesBurned ,
+                            active:data.exercise,
+                            link1:"https://www.ageuk.org.uk/northern-ireland/information-advice/health-wellbeing/fitness/walking-tips-advice/#:~:text=Simple%20tips%20for%20successful%20walking%20exercise%201%201.,outdoors%20...%206%206.%20Wear%20thin%20layers%20",
+                            link2:"https://www.nhs.uk/live-well/exercise/",
                         
-                        res.render('wellness.ejs',{
-                                rating: data.rating,
-                                sleepHrs: data.sleepHrs,
-                                social:data.social,
-            
-                            })
-                    }else if(data.social > 5){
-                        res.render('wellness.ejs',{
-                            rating: data.rating,
-                            sleepHrs: data.sleepHrs,
-                            social:data.social,
-        
-                        })
-
-                    }
-                    
-                    /*else if(data.rating > 5){
-                        res.render('wellness.ejs',{
-                            rating: data.rating,
-                            sleepHrs: data.sleepHrs,
-                            social:data.social,
                             
                         })
-            
-            
+                    }else{// less than 5 ratinng but more than 6 hrs sleep
+                        res.render('fitness.ejs',{
+                            steps: data.steps,
+                            calories:data.caloriesBurned ,
+                            active:data.exercise,
+                            link1:"https://www.bbc.co.uk/programmes/articles/51SPhn5FKSYRnQNswfnWsN2/8-reasons-why-we-should-all-walk-more#:~:text=Six%20tips%20for%20how%20to%20walk%20more%20during,around%20when%20you%E2%80%99re%20on%20the%20call.%20More%20items",
+                            link2:"https://www.nia.nih.gov/health/staying-motivated-exercise-tips-older-adults",
+                        
+                            
+                        })
                     }
-                */ }
+                }
+                else{ // rating more than 5
+                    if(data.exercise < 30){// sleep less than 6
+                        res.render('fitness.ejs',{
+                            steps: data.steps,
+                            calories:data.caloriesBurned ,
+                            active:data.exercise,
+                            link1:"https://www.healthline.com/health/how-to-walk#:~:text=Tips%20for%20walking%20properly%201%20Keep%20your%20head,...%206%20Step%20from%20heel%20to%20toe%20",
+                            link2:"https://darebee.com/fitness/how-to-exercise-more.html#:~:text=What%20should%20we%20do%20to%20exercise%20more%3F%201,you%20need%20to%20go%20flat-out%20in%20intensity.%20",
+                        
+                            
+                        })
+                    
+                    }else{ // more than 5000 steps and active individual
+                        res.render('fitness.ejs',{
+                            steps: data.steps,
+                            calories:data.caloriesBurned ,
+                            active:data.exercise,
+                            link1:"https://www.healthline.com/health/how-to-walk#:~:text=Tips%20for%20walking%20properly%201%20Keep%20your%20head,...%206%20Step%20from%20heel%20to%20toe%20",
+                            link2:"https://www.nia.nih.gov/health/staying-motivated-exercise-tips-older-adults",
+                        
+                            
+                        })
+    
+    
+                    }
+        
+        
+                }
+            }
+            
             else{
                 res.render('wellness.ejs',{
-                    rating: "Not Submitted for today",
-                    sleepHrs: "Not Submitted for today",
-                    social:"Not Submitted for today"
-
-                })
-
-
-            }
-            })
-                
-               
-    .catch(err=>{
+                        steps: "Not Submitted Today",
+                        calories:"Not Submitted Today" ,
+                        active:"Not Submitted Today",
+                        link1:'',
+                        link2:'',
+                        
+                    })
+            }})
+        .catch(err=>{
     
         console.log(err)
     
