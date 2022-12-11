@@ -296,9 +296,6 @@ app1.get('/user/getFitnessData',function(req,res){
                     
                         
                     })
-        
-
-
                 }
             }
             else{ // steps more than 5000
@@ -451,54 +448,101 @@ app1.get('/user/diet',function(req,res){
         
     }).then((data)=>{
 
-    if(data != false){// if there is data
-        console.log(data)
-        if(data.calIntake < 1000){
-            
-            res.render('diet.ejs',{
-                    numOfMeals: data.mealNo,
-                    calInt: data.calIntake,
-                    alcCon:data.alcConsumed,
-                    link:'https://www.nhs.uk/conditions/malnutrition/'
-                })
-        }else if(data.calIntake > 2800){
-            res.render('diet.ejs',{
-                numOfMeals: data.mealNo,
-                calInt: data.calIntake,
-                alcCon:data.alcConsumed,
-                link:'https://www.healthline.com/nutrition/how-to-stop-overeating#TOC_TITLE_HDR_3'
-            })
-
-
-        }else if(data.calIntake>= 1000 && data.calIntake < 2800){
-
-            res.render('diet.ejs',{
-                numOfMeals: data.mealNo,
-                calInt: data.calIntake,
-                alcCon:data.alcConsumed,
-                link:'https://www.nia.nih.gov/health/maintaining-healthy-weight'
-            })
-
-
-            
-        }}
-    else{
-        res.render('diet.ejs',{
-                numOfMeals: "Not Submitted Today",
-                calInt:"Not Submitted Today" ,
-                alcCon:"Not Submitted Today",
-                link:'http://localhost:9999/user/diet'
+        if(data != false){// if there is data
+            console.log(data)
+            if(data.calIntake < 1500){//under cals
+                if(data.alcConsumed < 30){// less cals and drinkning moderately
+                    res.render('diet.ejs',{
+                        numOfMeals: data.mealNo,
+                        calInt:data.calIntake,
+                        alcCon:data.alcConsumed,
+                        link1:"https://www.healthline.com/nutrition/1500-calorie-diet",
+                        link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
+                    
+                        
+                    })
+                }else{// less cals and drinking a lot
+                    res.render('diet.ejs',{
+                        numOfMeals: data.mealNo,
+                        calInt:data.calIntake,
+                        alcCon:data.alcConsumed,
+                        link1:"https://www.healthline.com/nutrition/1500-calorie-diet",
+                        link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
+                    })
+                }
+            }
+            else if(data.calIntake < 2500 && data.calIntake > 1500){ // eating the right amount of calories 
+                if(data.alcConsumed < 3){//over eating but long term drinking
+                    res.render('diet.ejs',{
+                        numOfMeals: data.mealNo,
+                        calInt:data.calIntake,
+                        alcCon:data.alcConsumed,
+                        link1:"https://www.who.int/initiatives/behealthy/healthy-diet",
+                        link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
+                    
+                        
+                    })
                 
-            })
+                }else{ // over eating and over drinking
+                    res.render('diet.ejs',{
+                        numOfMeals: data.mealNo,
+                        calInt:data.calIntake,
+                        alcCon:data.alcConsumed,
+                        link1:'https://www.who.int/initiatives/behealthy/healthy-diet',
+                        link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
+                    
+                        
+                    })
 
-    }
+
+                }
+            
     
+                
+            }else{//more than 2500 calories
+                if(data.alcConsumed < 3){//over eating but drinking in moderation
+                    res.render('diet.ejs',{
+                        numOfMeals: data.mealNo,
+                        calInt:data.calIntake,
+                        alcCon:data.alcConsumed,
+                        link1:"https://www.livestrong.com/article/478687-the-effects-of-too-many-calories/",
+                        link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
+  
+                    })
+                
+                }else{ // over eating and over drinking
+                    res.render('diet.ejs',{
+                        numOfMeals: data.mealNo,
+                        calInt:data.calIntake,
+                        alcCon:data.alcConsumed,
+                        link1:'https://www.livestrong.com/article/478687-the-effects-of-too-many-calories/',
+                        link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
+                    
+                        
+                    })
 
 
+                }
 
-})
-
-.catch(err=>{
+            }
+        }
+        
+        else{
+            res.render('diet.ejs',{
+                numOfMeals: "Not Submitted for today",
+                calInt:"Not Submitted for today",
+                alcCon:"Not Submitted for today",
+                link1:"",
+                link2:"",
+                    
+                })
+        }})
+    
+    
+    
+    
+    
+    .catch(err=>{
 
     console.log(err)
 
