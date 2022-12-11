@@ -128,7 +128,6 @@ app1.get('/user/getWellnessData',function(req,res){
         }).then((data)=>{
     
             if(data != false){// if there is data
-                console.log(data)
                 if(data.rating < 5){//rating less that 5
                     if(data.sleepHrs < 6){// less than 5 and less than 6 hrs sleep
                         res.render('wellness.ejs',{
@@ -205,7 +204,6 @@ app1.post('/user/wellness/submitWellnessData',function(req,res){
     .then((response)=>{ // database empty?
         return response.text()
     }).then((data)=>{// if entry exists
-        console.log('data:' + data)
          if(data.length > 1){
             return data
         }else{
