@@ -11,7 +11,7 @@ form.addEventListener('submit', event=>{
 
     var req = new XMLHttpRequest()
 
-    req.open('GET','http://localhost:9999/emailCheck',false)
+    req.open('GET','http://localhost:1111/emailCheck',false)
 
     req.onload = function(){
         if(req.status == 200){

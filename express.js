@@ -13,7 +13,6 @@ app1.use(express.static('public'))
 
 app1.use(cors({origin: 'http://127.0.0.1:5500'}))
 
-
 var userEmail = undefined
 
 const users = require('./Users.model.js')
@@ -27,13 +26,13 @@ const { resolveCaa } = require('dns');
 const { rejects } = require('assert');
 const { link } = require('fs');
 
-var port = 9999;
+var port = 1111;
 
 
 var db = 'mongodb://localhost:27017/HealthyLife';
 
-mongoose.connect(db);
 
+mongoose.connect(db)
 
 function databaseInsert(formEmail,formFname,formLname,formPassword){
     console.log(formEmail)
@@ -112,7 +111,7 @@ app1.get('/user/getWellnessData',function(req,res){
 
 
  app1.get('/user/wellness',function(req,res){
-        fetch('http://localhost:9999/user/getWellnessData')
+        fetch('http://localhost:1111/user/getWellnessData')
         .then((data)=>{
             return data.text()
     
@@ -202,7 +201,7 @@ app1.get('/user/getWellnessData',function(req,res){
 
 app1.post('/user/wellness/submitWellnessData',function(req,res){
     var date = new Date()
-    fetch('http://localhost:9999/user/getWellnessData')
+    fetch('http://localhost:1111/user/getWellnessData')
     .then((response)=>{ // database empty?
         return response.text()
     }).then((data)=>{// if entry exists
@@ -250,12 +249,12 @@ app1.post('/user/wellness/submitWellnessData',function(req,res){
                         })
 
                     
-                res.redirect('http://localhost:9999/user/wellness')
+                res.redirect('http://localhost:1111/user/wellness')
             }
             else{
 
                 res.render('submitted.ejs',{
-                    previousPage: 'http://localhost:9999/user/wellness'
+                    previousPage: 'http://localhost:1111/user/wellness'
 
                 })
 
@@ -278,7 +277,7 @@ app1.get('/user/getFitnessData',function(req,res){
 
 
  app1.get('/user/fitness',function(req,res){
-        fetch('http://localhost:9999/user/getFitnessData')
+        fetch('http://localhost:1111/user/getFitnessData')
         .then((data)=>{
             return data.text()
     
@@ -374,7 +373,7 @@ app1.get('/user/getFitnessData',function(req,res){
 
 app1.post('/user/fitness/submitFitnessData',function(req,res){
     var date = new Date()
-    fetch('http://localhost:9999/user/getFitnessData')
+    fetch('http://localhost:1111/user/getFitnessData')
     .then((response)=>{ // database empty?
         return response.text()
     }).then((data)=>{// if entry exists
@@ -422,12 +421,12 @@ app1.post('/user/fitness/submitFitnessData',function(req,res){
                         })
 
                     
-                res.redirect('http://localhost:9999/user/fitness')
+                res.redirect('http://localhost:1111/user/fitness')
             }
             else{
 
                 res.render('submitted.ejs',{
-                    previousPage: 'http://localhost:9999/user/fitness'
+                    previousPage: 'http://localhost:1111/user/fitness'
 
                 })
 
@@ -454,7 +453,7 @@ app1.get('/user/getDietData',function(req,res){
 
 app1.get('/user/diet',function(req,res){
     console.log(userEmail)
-    fetch('http://localhost:9999/user/getDietData')
+    fetch('http://localhost:1111/user/getDietData')
     .then((data)=>{
         return data.text()
 
@@ -575,7 +574,7 @@ app1.get('/user/diet',function(req,res){
 
 app1.post('/user/diet/submitDietData',function(req,res){
     var date = new Date()
-    fetch('http://localhost:9999/user/getDietData')
+    fetch('http://localhost:1111/user/getDietData')
     .then((response)=>{ // database empty?
         return response.text()
     }).then((data)=>{// if entry exists
@@ -623,12 +622,12 @@ app1.post('/user/diet/submitDietData',function(req,res){
                         })
 
                     
-                res.redirect('http://localhost:9999/user/diet')
+                res.redirect('http://localhost:1111/user/diet')
             }
             else{
 
                 res.render('submitted.ejs',{
-                    previousPage: 'http://localhost:9999/user/diet'
+                    previousPage: 'http://localhost:1111/user/diet'
 
                 })
 
@@ -661,7 +660,7 @@ app1.post('/logIn/request',function(req,res){
                             }
                             else {
                                 userEmail = req.body.email
-                                res.redirect('http://localhost:9999/user/diet')
+                                res.redirect('http://localhost:1111/user/diet')
                                 
 
 
@@ -679,15 +678,6 @@ app1.post('/logIn/request',function(req,res){
 
 
 
-app1.get('/users/getFitnessData',function(req,res){
-    dietData.findOne({email:"test@t.com"},function(err,data){
-        if(err){
-            console.log(err)
-        }else{
-            //res.send(data)
-        }
-    })
-})
 
     
 app1.listen(port,function(err){
