@@ -15,6 +15,7 @@ app1.use(cors({origin: 'http://127.0.0.1:5500'}))
 
 var userEmail = undefined
 
+const jwt = require("jsonwebtoken")
 const users = require('./Users.model.js')
 const dietData = require('./userDiet-model.js');
 const fitness = require('./UserFitness-model.js')
@@ -659,9 +660,9 @@ app1.post('/logIn/request',function(req,res){
                             else {
                                 userEmail = req.body.email
                                 res.redirect('http://localhost:1111/user/diet')
-                                
-
-
+                                const user = {user:req.body.email}
+                                const aToken = jwt.sign(user,'bf8dc6e515b2d7e03020d898dfa27eb028c3d9c9338186ecb68df07842fa1ff3')
+                                console.log(aToken)
 
                                 }
                         }
@@ -674,7 +675,22 @@ app1.post('/logIn/request',function(req,res){
 })
 })
 
+function tokenCheck (req,res,next){
+    const ath = req.headers['authorization']
+    const token = ath && ath.split(' ')[1]
+    
+    if (token ==null ){
+        res.sendStatus(401)
+    }
+    jwt.verify(token,'bf8dc6e515b2d7e03020d898dfa27eb028c3d9c9338186ecb68df07842fa1ff3',(err,data)=>{
+        if(err){
+            res.sendStatus(403)
+        }
+        else{}
 
+
+    })
+}
 
 
     
