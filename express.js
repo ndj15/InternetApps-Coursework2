@@ -10,6 +10,7 @@ const x = require('util')
 app1.use(express.static('/'))
 const cors = require('cors')
 app1.use(express.static('public'))
+app1.use(express.static(__dirname + '/Webpage/'))
 
 app1.use(cors({origin: 'http://127.0.0.1:5500'}))
 
@@ -47,6 +48,19 @@ function databaseInsert(formEmail,formFname,formLname,formPassword){
     console.log('complete')
 }
 
+app1.get('/',function(req,res)
+{
+    
+    res.render('index')
+
+})
+
+app1.get('/login',function(req,res){
+    
+    res.render('LogIn')
+
+
+})
 
 
 app1.post('/signUp/createUser',function(req,res){
@@ -77,12 +91,7 @@ app1.post('/signUp/createUser',function(req,res){
         }
     }) 
 })
-app1.get('/user/index.html',function(req,res){
 
-
-
-
-})
 
 app1.get('/emailCheck',function(req,res){
     users.find({},function(err,data){
