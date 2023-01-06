@@ -62,16 +62,17 @@ app1.get('/login',function(req,res){
 })
 
 
-app1.post('/signUp/createUser', async function(req,res){
+
+app1.post('/signUp/createUser', function(req,res){
 //email check
-    users.findOne({email:req.body.email},function(error,data){
+    users.findOne({email:req.body.email}, async function(error,data){
         if(error){
             console.log('error - cannot find')
         }
         else{
             if(data == null){ // if there is no entry with email in database
                 if(req.body.password == req.body.passwordCheck){
-                    console.log('passwords passed authentication check')
+                    console.log('passwords match')
                     try{
                         securePass = await bcrypt.hash(req.body.password,10)
                         databaseInsert(req.body.email, req.body.fName,req.body.lName, securePass);
@@ -79,8 +80,6 @@ app1.post('/signUp/createUser', async function(req,res){
 
                         res.status(201).send("ERR hashing")
                     }
-                    
-
                 }
                 
                 else{
@@ -650,7 +649,7 @@ app1.post('/user/diet/submitDietData',function(req,res){
 
 app1.post('/logIn/request', async function(req,res){
 
- users.findOne({email:req.body.email},function(error,data){
+ users.findOne({email:req.body.email}, async function(error,data){
             if(error){
                 res.send(error)
             }
@@ -658,28 +657,21 @@ app1.post('/logIn/request', async function(req,res){
                 if(data==null){
                     res.send('cannot find account associated to ' + req.body.email)
                 }
-                else{
+                else{//finding email and password combination
                     try{
-                        users.findOne({email:req.body.email, password: (await bcrypt.compare(req.body.password, data.password))},function(error,data){
-                            if(error){
-                                res.send(error)
-                            }
-                            else{
-                                
-                                if(data == null){
-                                res.send("incorrect password, try again")
-                                }
-                                else {
-                                    userEmail = req.body.email
-                                    res.redirect('http://localhost:1111/user/diet')
-                                    const user = {user:req.body.email}
-                                    const aToken = jwt.sign(user,'bf8dc6e515b2d7e03020d898dfa27eb028c3d9c9338186ecb68df07842fa1ff3')
-                                    console.log(aToken)
+                        if(await bcrypt.compare(req.body.password, data.password)){
+                            //successfull login
+                            userEmail = req.body.email
+                            res.redirect('http://localhost:1111/user/diet')
+                            const user = {user:req.body.email}
+                            const aToken = jwt.sign(user,'bf8dc6e515b2d7e03020d898dfa27eb028c3d9c9338186ecb68df07842fa1ff3')
+                            console.log(aToken)
 
-                                
-                            }
-                        })
 
+                        }else{
+                            res.send("incorrect Password, Please try again")
+
+                        }
 
                     }catch{
                         res.status(500).send("ERROR")

@@ -29,26 +29,14 @@ form.addEventListener('submit', event=>{
                 }
             });
             
-            if(found ==true){//if email is found
-                 if(userData.password != password.value){
-                    errPass.innerHTML = 'Incorrect Password'
-                    errPass.style.color = 'red'
-                    errCount +=1
-
-
-                }else {
-                    errPass.innerHTML = ''
-                }
-
-
-            }else if((found == false) && (email.value.length > 0 )){
+            if((found == false) && (email.value.length > 0 )){
                 //there is no account associated to + email.value
                 errEmail.innerHTML = 'There are no Accounts associated to ' + email.value
                 errEmail.style.color = 'red'
                 errCount+=1
 
             }
-
+                 
 
         }else{
             console.log("connection Failed with Server")
