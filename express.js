@@ -2,6 +2,7 @@ const express = require('express');
 var mongoose = require('mongoose');
 const path = require('path')
 const ejs = require('ejs')
+const bcrypt = require("bcrypt")
 var app1 = express();
 app1.use(express.urlencoded({ extended: true }));
 app1.use(express.json())//middleware that parse post request
@@ -13,9 +14,7 @@ app1.use(express.static('public'))
 app1.use(express.static(__dirname + '/Webpage/'))
 
 app1.use(cors({origin: 'http://127.0.0.1:5500'}))
-
 var userEmail = undefined
-
 const jwt = require("jsonwebtoken")
 const users = require('./Users.model.js')
 const dietData = require('./userDiet-model.js');
@@ -63,7 +62,7 @@ app1.get('/login',function(req,res){
 })
 
 
-app1.post('/signUp/createUser',function(req,res){
+app1.post('/signUp/createUser', async function(req,res){
 //email check
     users.findOne({email:req.body.email},function(error,data){
         if(error){
@@ -73,7 +72,14 @@ app1.post('/signUp/createUser',function(req,res){
             if(data == null){ // if there is no entry with email in database
                 if(req.body.password == req.body.passwordCheck){
                     console.log('passwords passed authentication check')
-                    databaseInsert(req.body.email, req.body.fName,req.body.lName, req.body.password);
+                    try{
+                        securePass = await bcrypt.hash(req.body.password,10)
+                        databaseInsert(req.body.email, req.body.fName,req.body.lName, securePass);
+                    }catch{
+
+                        res.status(201).send("ERR hashing")
+                    }
+                    
 
                 }
                 
@@ -102,11 +108,7 @@ app1.get('/emailCheck',function(req,res){
             res.send(data)
 
         }
-
-
     })
-
-
 })
 
 app1.get('/user/getWellnessData',function(req,res){
@@ -646,7 +648,7 @@ app1.post('/user/diet/submitDietData',function(req,res){
     })
 })
 
-app1.post('/logIn/request',function(req,res){
+app1.post('/logIn/request', async function(req,res){
 
  users.findOne({email:req.body.email},function(error,data){
             if(error){
@@ -657,25 +659,32 @@ app1.post('/logIn/request',function(req,res){
                     res.send('cannot find account associated to ' + req.body.email)
                 }
                 else{
-                    users.findOne({email:req.body.email, password: req.body.password},function(error,data){
-                        if(error){
-                            res.send(error)
-                        }
-                        else{
-                            
-                            if(data == null){
-                            res.send("incorrect password, try again")
+                    try{
+                        users.findOne({email:req.body.email, password: (await bcrypt.compare(req.body.password, data.password))},function(error,data){
+                            if(error){
+                                res.send(error)
                             }
-                            else {
-                                userEmail = req.body.email
-                                res.redirect('http://localhost:1111/user/diet')
-                                const user = {user:req.body.email}
-                                const aToken = jwt.sign(user,'bf8dc6e515b2d7e03020d898dfa27eb028c3d9c9338186ecb68df07842fa1ff3')
-                                console.log(aToken)
-
+                            else{
+                                
+                                if(data == null){
+                                res.send("incorrect password, try again")
                                 }
-                        }
-                    })
+                                else {
+                                    userEmail = req.body.email
+                                    res.redirect('http://localhost:1111/user/diet')
+                                    const user = {user:req.body.email}
+                                    const aToken = jwt.sign(user,'bf8dc6e515b2d7e03020d898dfa27eb028c3d9c9338186ecb68df07842fa1ff3')
+                                    console.log(aToken)
+
+                                
+                            }
+                        })
+
+
+                    }catch{
+                        res.status(500).send("ERROR")
+                    }
+                    
                 }
             }
 
@@ -695,7 +704,9 @@ function tokenCheck (req,res,next){
         if(err){
             res.sendStatus(403)
         }
-        else{}
+        else{
+            console.log('all good')
+        }
 
 
     })
