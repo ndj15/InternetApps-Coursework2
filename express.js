@@ -12,6 +12,8 @@ app1.use(express.static('/'))
 const cors = require('cors')
 app1.use(express.static('public'))
 app1.use(express.static(__dirname + '/Webpage/'))
+const passport = require('passport')
+const sanitize = require('sanitize-html')
 
 app1.use(cors({origin: 'http://127.0.0.1:5500'}))
 var userEmail = undefined
@@ -26,6 +28,7 @@ const { validate } = require('./userDiet-model.js');
 const { resolveCaa } = require('dns');
 const { rejects } = require('assert');
 const { link } = require('fs');
+const sanitizeHtml = require('sanitize-html');
 
 var port = 1111;
 
@@ -61,21 +64,24 @@ app1.get('/login',function(req,res){
 
 })
 
+app1.get('/signUp',function(req,res){
+    res.render('SignUp')
+})
 
 
 app1.post('/signUp/createUser', function(req,res){
 //email check
-    users.findOne({email:req.body.email}, async function(error,data){
+    users.findOne({email:cleanInput(req.body.email)}, async function(error,data){
         if(error){
             console.log('error - cannot find')
         }
         else{
             if(data == null){ // if there is no entry with email in database
-                if(req.body.password == req.body.passwordCheck){
+                if(cleanInput(req.body.password) == cleanInput(req.body.passwordCheck)){
                     console.log('passwords match')
                     try{
-                        securePass = await bcrypt.hash(req.body.password,10)
-                        databaseInsert(req.body.email, req.body.fName,req.body.lName, securePass);
+                        securePass = await bcrypt.hash(cleanInput(cleanInput(req.body.password)),10)
+                        databaseInsert(cleanInput(req.body.email), cleanInput(req.body.fName),cleanInput(req.body.lName), securePass);
                     }catch{
 
                         res.status(201).send("ERR hashing")
@@ -234,9 +240,9 @@ app1.post('/user/wellness/submitWellnessData',function(req,res){
     }).then((data)=>{
         if(data != true){
             var values = []
-            values[0] = req.body.rating
-            values[1] = req.body.sleep
-            values[2] = req.body.social
+            values[0] = cleanInput(req.body.rating)
+            values[1] = cleanInput(req.body.sleep)
+            values[2] = cleanInput(req.body.social)
             return values
             
         }else{
@@ -256,8 +262,6 @@ app1.post('/user/wellness/submitWellnessData',function(req,res){
                 social: data[2]
     
                         })
-
-                    
                 res.redirect('http://localhost:1111/user/wellness')
             }
             else{
@@ -406,9 +410,9 @@ app1.post('/user/fitness/submitFitnessData',function(req,res){
     }).then((data)=>{
         if(data != true){
             var values = []
-            values[0] = req.body.stepCount
-            values[1] = req.body.calBurned
-            values[2] = req.body.exercise
+            values[0] = cleanInput(req.body.stepCount)
+            values[1] = cleanInput(req.body.calBurned)
+            values[2] = cleanInput(req.body.exercise)
             return values
             
         }else{
@@ -460,7 +464,7 @@ app1.get('/user/getDietData',function(req,res){
 
 
 
-app1.get('/user/diet',function(req,res){
+app1.get('/user/diet',tokenCheck,function(req,res){
     console.log(userEmail)
     fetch('http://localhost:1111/user/getDietData')
     .then((data)=>{
@@ -608,9 +612,9 @@ app1.post('/user/diet/submitDietData',function(req,res){
     }).then((data)=>{
         if(data != true){
             var values = []
-            values[0] = req.body.mealNo
-            values[1] = req.body.calInt
-            values[2] = req.body.alcCon
+            values[0] = cleanInput(req.body.mealNo)
+            values[1] = cleanInput(req.body.calInt)
+            values[2] = cleanInput(req.body.alcCon)
             return values
             
         }else{
@@ -649,7 +653,7 @@ app1.post('/user/diet/submitDietData',function(req,res){
 
 app1.post('/logIn/request', async function(req,res){
 
- users.findOne({email:req.body.email}, async function(error,data){
+ users.findOne({email:cleanInput(req.body.email)}, async function(error,data){
             if(error){
                 res.send(error)
             }
@@ -659,14 +663,15 @@ app1.post('/logIn/request', async function(req,res){
                 }
                 else{//finding email and password combination
                     try{
-                        if(await bcrypt.compare(req.body.password, data.password)){
+                        if(await bcrypt.compare(cleanInput(req.body.password), cleanInput(data.password))){
                             //successfull login
-                            userEmail = req.body.email
-                            res.redirect('http://localhost:1111/user/diet')
-                            const user = {user:req.body.email}
+                            userEmail = cleanInput(req.body.email)
+                            
+                            const user = {user:cleanInput(req.body.email)}
                             const aToken = jwt.sign(user,'bf8dc6e515b2d7e03020d898dfa27eb028c3d9c9338186ecb68df07842fa1ff3')
+                            res.json({accessToken: aToken})
                             console.log(aToken)
-
+                            res.redirect('http://localhost:1111/user/diet')
 
                         }else{
                             res.send("incorrect Password, Please try again")
@@ -689,7 +694,7 @@ function tokenCheck (req,res,next){
     const ath = req.headers['authorization']
     const token = ath && ath.split(' ')[1]
     
-    if (token ==null ){
+    if (token == null ){//if there is no token sent through headers
         res.sendStatus(401)
     }
     jwt.verify(token,'bf8dc6e515b2d7e03020d898dfa27eb028c3d9c9338186ecb68df07842fa1ff3',(err,data)=>{
@@ -698,13 +703,22 @@ function tokenCheck (req,res,next){
         }
         else{
             console.log('all good')
+            req.user = data
+            next()
         }
 
 
     })
 }
 
+function cleanInput(userInput){
+    var cleanText = sanitizeHtml(userInput,{
+        allowedTags:[],
+        allowedAttributes:{}
+    })
 
+    return cleanText
+}
     
 app1.listen(port,function(err){
     if(err){console.log(err)}
