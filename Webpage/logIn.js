@@ -1,6 +1,6 @@
 const form = document.getElementById('loginForm')
-const email = document.getElementById("email")
-const password = document.getElementById('password')
+const email = cleanInput(document.getElementById("email").value)
+const password = cleanInput(document.getElementById('password').value)
 const errBlank = document.getElementById('blankMes')
 const errEmail = document.getElementById('emailMes')
 const errPass= document.getElementById('passMes')
@@ -8,12 +8,17 @@ const sanitize = require("sanitize-html")
 
 
 
-function cleanInput(userText){
 
-
-
+    function cleanInput(userInput){
+        var cleanText = sanitizeHtml(userInput,{
+            allowedTags:[],
+            allowedAttributes:{}
+        })
     
-}
+        return cleanText
+    }
+
+
 
 form.addEventListener('submit', event=>{
     var errCount = 0
@@ -30,7 +35,7 @@ form.addEventListener('submit', event=>{
             
 
             data.forEach(element => {
-                if(element.email == email.value){
+                if(element.email == email){
                     userData = element
                     found = true;
 
@@ -38,9 +43,9 @@ form.addEventListener('submit', event=>{
                 }
             });
             
-            if((found == false) && (email.value.length > 0 )){
+            if((found == false) && (email.length > 0 )){
                 //there is no account associated
-                errEmail.innerHTML = 'There are no Accounts associated to ' + email.value
+                errEmail.innerHTML = 'There are no Accounts associated to ' + email
                 errEmail.style.color = 'red'
                 errCount+=1
 
@@ -53,17 +58,11 @@ form.addEventListener('submit', event=>{
 
         }
 
-        
-
-
-
-
-
     }
 
     req.send()
 
-    if(email.value == '' || password.value == ''){
+    if(email == '' || password == ''){
         errCount += 1
         errBlank.innerHTML = 'Cannot Leave Fields Blank'
         errBlank.style.color = 'red'
