@@ -4,7 +4,16 @@ const password = document.getElementById('password')
 const errBlank = document.getElementById('blankMes')
 const errEmail = document.getElementById('emailMes')
 const errPass= document.getElementById('passMes')
+const sanitize = require("sanitize-html")
 
+
+
+function cleanInput(userText){
+
+
+
+    
+}
 
 form.addEventListener('submit', event=>{
     var errCount = 0
@@ -30,7 +39,7 @@ form.addEventListener('submit', event=>{
             });
             
             if((found == false) && (email.value.length > 0 )){
-                //there is no account associated to + email.value
+                //there is no account associated
                 errEmail.innerHTML = 'There are no Accounts associated to ' + email.value
                 errEmail.style.color = 'red'
                 errCount+=1
