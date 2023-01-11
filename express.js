@@ -13,8 +13,30 @@ const cors = require('cors')
 app1.use(express.static('public'))
 app1.use(express.static(__dirname + '/Webpage/'))
 const passport = require('passport')
-const sanitize = require('sanitize-html')
+const strat = require("passport-local").Strategy
+app1.use(flash())
+app1.use(session({
+    secret:'c8afee1b3508e34 ',//secret key
+    resave:false,
+    saveUninitialized: false
 
+}))
+app1.use(passport.initialize)
+app1.use(passport.session())
+
+passport.serializeUser((user,done)=>{
+    done(null,user.id)
+
+})
+passport.deserializeUser((user,done)=>
+    {
+        done(null,user)
+    })
+passport.use(new localStrategy(
+    function(username,password,done){
+
+    }
+))
 app1.use(cors({origin: 'http://127.0.0.1:5500'}))
 var userEmail = undefined
 const jwt = require("jsonwebtoken")
@@ -29,11 +51,9 @@ const { resolveCaa } = require('dns');
 const { rejects } = require('assert');
 const { link } = require('fs');
 const sanitizeHtml = require('sanitize-html');
-
 var port = 1111;
-
-
 var db = 'mongodb://localhost:27017/HealthyLife';
+
 
 
 mongoose.connect(db)
@@ -127,7 +147,7 @@ app1.get('/user/getWellnessData',function(req,res){
     })})
 
 
- app1.get('/user/wellness',function(req,res){
+ app1.get('/user/wellness',isAuth,function(req,res){ 
         fetch('http://localhost:1111/user/getWellnessData')
         .then((data)=>{
             return data.text()
@@ -289,7 +309,7 @@ app1.get('/user/getFitnessData',function(req,res){
     })})
 
 
- app1.get('/user/fitness',function(req,res){
+ app1.get('/user/fitness',isAuth,function(req,res){
         fetch('http://localhost:1111/user/getFitnessData')
         .then((data)=>{
             return data.text()
@@ -464,7 +484,7 @@ app1.get('/user/getDietData',function(req,res){
 
 
 
-app1.get('/user/diet',tokenCheck,function(req,res){
+app1.get('/user/diet',isAuth,function(req,res){
     console.log(userEmail)
     fetch('http://localhost:1111/user/getDietData')
     .then((data)=>{
@@ -651,7 +671,7 @@ app1.post('/user/diet/submitDietData',function(req,res){
     })
 })
 
-app1.post('/logIn/request', async function(req,res){
+app1.post('/logIn/request', function(req,res){
 
  users.findOne({email:cleanInput(req.body.email)}, async function(error,data){
             if(error){
@@ -667,10 +687,7 @@ app1.post('/logIn/request', async function(req,res){
                             //successfull login
                             userEmail = cleanInput(req.body.email)
                             
-                            const user = {user:cleanInput(req.body.email)}
-                            const aToken = jwt.sign(user,'bf8dc6e515b2d7e03020d898dfa27eb028c3d9c9338186ecb68df07842fa1ff3')
-                            res.json({accessToken: aToken})
-                            console.log(aToken)
+                            
                             res.redirect('http://localhost:1111/user/diet')
 
                         }else{
@@ -684,31 +701,49 @@ app1.post('/logIn/request', async function(req,res){
                     
                 }
             }
-
-
-
 })
 })
 
-function tokenCheck (req,res,next){
-    const ath = req.headers['authorization']
-    const token = ath && ath.split(' ')[1]
-    
-    if (token == null ){//if there is no token sent through headers
-        res.sendStatus(401)
+app1.post('/login/request', function(req,res){
+
+    passport.use(new localStrategy((username, password)))
+        {
+            users.findOne({email:username},async (err,data)=>{
+                if(err){
+                    res.send(err)
+                }
+                if(!data){
+                    res.send("cannot find account associated to" + req.body.email)
+                }
+                else{
+                    try{
+                        if(await bcrypt.compare(req.body.password, data.password)){
+                            return data
+                        }
+                        else
+                        {
+                            res.send("incorrect password, please try again")
+                        }
+                    }catch{
+                        res.status(500).send("ERROR IN BCRYPT")
+                    }
+
+                }
+
+
+            })
+        }
+
+
+})
+
+function isAuth(req,res){
+    if(req.isAuthenticated()){
+        return
+    }else{
+        res.redirect('/login')
     }
-    jwt.verify(token,'bf8dc6e515b2d7e03020d898dfa27eb028c3d9c9338186ecb68df07842fa1ff3',(err,data)=>{
-        if(err){
-            res.sendStatus(403)
-        }
-        else{
-            console.log('all good')
-            req.user = data
-            next()
-        }
 
-
-    })
 }
 
 function cleanInput(userInput){
@@ -719,7 +754,12 @@ function cleanInput(userInput){
 
     return cleanText
 }
-    
+
+app1.get('/logOut',(req,res)=>{
+    req.logout()
+    req.redirect('/')
+
+})
 app1.listen(port,function(err){
     if(err){console.log(err)}
     else{
