@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express');
 var mongoose = require('mongoose');
 const path = require('path')
@@ -11,35 +12,11 @@ const x = require('util')
 app1.use(express.static('/'))
 const cors = require('cors')
 app1.use(express.static('public'))
-app1.use(express.static(__dirname + '/Webpage/'))
-const passport = require('passport')
-const strat = require("passport-local").Strategy
-app1.use(flash())
-app1.use(session({
-    secret:'c8afee1b3508e34 ',//secret key
-    resave:false,
-    saveUninitialized: false
+app1.use('/html',express.static(__dirname + '/Webpage'))
 
-}))
-app1.use(passport.initialize)
-app1.use(passport.session())
 
-passport.serializeUser((user,done)=>{
-    done(null,user.id)
-
-})
-passport.deserializeUser((user,done)=>
-    {
-        done(null,user)
-    })
-passport.use(new localStrategy(
-    function(username,password,done){
-
-    }
-))
 app1.use(cors({origin: 'http://127.0.0.1:5500'}))
 var userEmail = undefined
-const jwt = require("jsonwebtoken")
 const users = require('./Users.model.js')
 const dietData = require('./userDiet-model.js');
 const fitness = require('./UserFitness-model.js')
@@ -54,9 +31,88 @@ const sanitizeHtml = require('sanitize-html');
 var port = 1111;
 var db = 'mongodb://localhost:27017/HealthyLife';
 
-
-
 mongoose.connect(db)
+//passport
+const session = require('express-session')
+const passport = require('passport')
+const LocalStrategy = require('passport-local')
+
+app1.use(session({
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: true
+}))
+
+app1.use(passport.initialize())
+app1.use(passport.session())
+
+passport.serializeUser((user,done)=>{
+    done(null,user.email)
+})
+
+passport.deserializeUser((email,done)=>{
+    users.findOne({email:email},(err,data)=>{
+        done(err,data)
+    })
+
+
+})
+
+passport.use(new LocalStrategy({
+    usernameField:'email',
+    passwordField:'password'
+}, async function (email,password,done){
+    users.findOne({email:email},async (err,data)=>{
+        if(err){
+            res.send(err)
+        }
+        if(!data){
+            console.log('incorrect email')
+            return done(null,false)
+            
+            // include something that says its incorrect
+        }
+            try{
+                if(await bcrypt.compare(cleanInput(password), user.password)){
+                    //successfull login
+                    
+                    res.redirect('http://localhost:1111/user/diet')
+                    return done(null,data)
+                }else{
+                    //"incorrect Password, Please try again")
+                    console.log('incorrect password')
+                    done(null,false)
+
+                }
+
+            }catch{
+                console.log('error with bcrypt')
+                //error gtetting bcrypt
+            }
+
+
+        
+
+    })
+
+
+}
+
+
+
+))
+
+
+function loggedOut(req,res,next){//if not authenitcated
+    if(!req.isAuthenticated){
+        return next()
+    }
+    else{//if they are authenticated
+        res.redirect('/user/diet')
+    }
+}
+
+
 
 function databaseInsert(formEmail,formFname,formLname,formPassword){
     console.log(formEmail)
@@ -70,22 +126,18 @@ function databaseInsert(formEmail,formFname,formLname,formPassword){
     console.log('complete')
 }
 
-app1.get('/',function(req,res)
+app1.get('/',isAuth,function(req,res)
 {
-    
-    res.render('index')
-
+    res.redirect("http://www.google.com")
 })
+
 
 app1.get('/login',function(req,res){
-    
-    res.render('LogIn')
-
+    res.redirect('http://localhost:1111/html/logIn.html')
 
 })
-
 app1.get('/signUp',function(req,res){
-    res.render('SignUp')
+    res.redirect("http://localhost:1111/html/SignUp.html")
 })
 
 
@@ -102,6 +154,7 @@ app1.post('/signUp/createUser', function(req,res){
                     try{
                         securePass = await bcrypt.hash(cleanInput(cleanInput(req.body.password)),10)
                         databaseInsert(cleanInput(req.body.email), cleanInput(req.body.fName),cleanInput(req.body.lName), securePass);
+                        res.redirect('/user/diet')
                     }catch{
 
                         res.status(201).send("ERR hashing")
@@ -124,11 +177,11 @@ app1.post('/signUp/createUser', function(req,res){
 })
 
 
-app1.get('/emailCheck',function(req,res){
+app1.get('/emailCheck',isAuth,function(req,res){
     users.find({},function(err,data){
         if(err){
 
-            console.log(err)
+            console.log(err + 'ddd')
         }else{
             res.send(data)
 
@@ -474,9 +527,9 @@ app1.post('/user/fitness/submitFitnessData',function(req,res){
 //return entry in table with email and today's date
 app1.get('/user/getDietData',function(req,res){
     var date = new Date()
-        dietData.findOne({email:userEmail,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
+        dietData.findOne({email:req.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
         if(err){
-            console.log(err)
+            console.log(err+'www')
         }else{
             res.send(data)
         }
@@ -670,8 +723,8 @@ app1.post('/user/diet/submitDietData',function(req,res){
         console.log(err)
     })
 })
-
-app1.post('/logIn/request', function(req,res){
+/*
+app1.post('/logIn/request',passport.authenticate('local', {failureRedirect:'/login', successRedirect:'/user/diet'}) ,function(req,res){
 
  users.findOne({email:cleanInput(req.body.email)}, async function(error,data){
             if(error){
@@ -703,48 +756,14 @@ app1.post('/logIn/request', function(req,res){
             }
 })
 })
-
-app1.post('/login/request', function(req,res){
-
-    passport.use(new localStrategy((username, password)))
-        {
-            users.findOne({email:username},async (err,data)=>{
-                if(err){
-                    res.send(err)
-                }
-                if(!data){
-                    res.send("cannot find account associated to" + req.body.email)
-                }
-                else{
-                    try{
-                        if(await bcrypt.compare(req.body.password, data.password)){
-                            return data
-                        }
-                        else
-                        {
-                            res.send("incorrect password, please try again")
-                        }
-                    }catch{
-                        res.status(500).send("ERROR IN BCRYPT")
-                    }
-
-                }
+*/
 
 
-            })
-        }
-
-
-})
-
-function isAuth(req,res){
-    if(req.isAuthenticated()){
-        return
-    }else{
-        res.redirect('/login')
-    }
-
-}
+app1.post('/login', passport.authenticate('local',{
+    successRedirect:'/user/diet',
+    failureRedirect:'/login'
+    //implement flash
+}))
 
 function cleanInput(userInput){
     var cleanText = sanitizeHtml(userInput,{
@@ -755,11 +774,27 @@ function cleanInput(userInput){
     return cleanText
 }
 
-app1.get('/logOut',(req,res)=>{
-    req.logout()
-    req.redirect('/')
+function isAuth(req,res,next){
+    if(req.isAuthenticated()){
+        return next()
+    }else{
+        res.redirect('/login')
+    }
 
+
+}
+
+app1.get('/logout',function(req,res,next){
+    req.logout(function(err){
+        if(err){
+            console.log(err)
+        }else{
+            res.redirect('http://localhost:1111/')
+
+        }
+    });
 })
+
 app1.listen(port,function(err){
     if(err){console.log(err)}
     else{
