@@ -58,7 +58,6 @@ app1.get('/emailCheck',function(req,res){
 })
 
 
-
 app1.use(passport.initialize())
 app1.use(passport.session())
 
@@ -299,7 +298,7 @@ app1.get('/user/getFitnessData',function(req,res){
     })})
 
 
- app1.get('/user/fitness',isAuth,function(req,res){
+ app1.get('/user/fitness',function(req,res){
         fetch('http://localhost:1111/user/getFitnessData')
         .then((data)=>{
             return data.text()
@@ -699,10 +698,10 @@ app1.post('/login',passport.authenticate('local',
 {
         successRedirect:'/user/diet',
         failureRedirect:'/login',
+        //use flash for message
         
 
 })
-
 
 )
 
@@ -717,6 +716,7 @@ function cleanInput(userInput){
 
 function isAuth(req,res,next){
     if(req.isAuthenticated()){
+        console.log(req.user)
         return next()
     }else{
         res.redirect('/login')
