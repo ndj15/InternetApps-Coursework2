@@ -13,8 +13,6 @@ app1.use(express.static('/'))
 const cors = require('cors')
 app1.use(express.static('public'))
 app1.use('/html',express.static(__dirname + '/Webpage'))
-
-
 app1.use(cors({origin: 'http://127.0.0.1:5500'}))
 var userEmail = undefined
 const users = require('./Users.model.js')
@@ -28,89 +26,42 @@ const { resolveCaa } = require('dns');
 const { rejects } = require('assert');
 const { link } = require('fs');
 const sanitizeHtml = require('sanitize-html');
+
 var port = 1111;
 var db = 'mongodb://localhost:27017/HealthyLife';
 
 mongoose.connect(db)
-//passport
-const session = require('express-session')
-const passport = require('passport')
-const LocalStrategy = require('passport-local')
 
+
+//passport
+const passport = require('passport')
+const LocalStrategy = require('passport-local').Strategy;
+const initPass = require('./passport-conf')
+const flash = require('express-flash')
+const session = require('express-session')
+const local = require('./passport-conf')
 app1.use(session({
     secret: process.env.SECRET,
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false
 }))
+app1.get('/emailCheck',function(req,res){
+    users.find({},function(err,data){
+        if(err){
+
+            console.log(err + 'ddd')
+        }else{
+            res.send(data)
+
+        }
+    })
+})
+
+
 
 app1.use(passport.initialize())
 app1.use(passport.session())
 
-passport.serializeUser((user,done)=>{
-    done(null,user.email)
-})
-
-passport.deserializeUser((email,done)=>{
-    users.findOne({email:email},(err,data)=>{
-        done(err,data)
-    })
-
-
-})
-
-passport.use(new LocalStrategy({
-    usernameField:'email',
-    passwordField:'password'
-}, async function (email,password,done){
-    users.findOne({email:email},async (err,data)=>{
-        if(err){
-            res.send(err)
-        }
-        if(!data){
-            console.log('incorrect email')
-            return done(null,false)
-            
-            // include something that says its incorrect
-        }
-            try{
-                if(await bcrypt.compare(cleanInput(password), user.password)){
-                    //successfull login
-                    
-                    res.redirect('http://localhost:1111/user/diet')
-                    return done(null,data)
-                }else{
-                    //"incorrect Password, Please try again")
-                    console.log('incorrect password')
-                    done(null,false)
-
-                }
-
-            }catch{
-                console.log('error with bcrypt')
-                //error gtetting bcrypt
-            }
-
-
-        
-
-    })
-
-
-}
-
-
-
-))
-
-
-function loggedOut(req,res,next){//if not authenitcated
-    if(!req.isAuthenticated){
-        return next()
-    }
-    else{//if they are authenticated
-        res.redirect('/user/diet')
-    }
-}
 
 
 
@@ -126,10 +77,6 @@ function databaseInsert(formEmail,formFname,formLname,formPassword){
     console.log('complete')
 }
 
-app1.get('/',isAuth,function(req,res)
-{
-    res.redirect("http://www.google.com")
-})
 
 
 app1.get('/login',function(req,res){
@@ -177,17 +124,7 @@ app1.post('/signUp/createUser', function(req,res){
 })
 
 
-app1.get('/emailCheck',isAuth,function(req,res){
-    users.find({},function(err,data){
-        if(err){
 
-            console.log(err + 'ddd')
-        }else{
-            res.send(data)
-
-        }
-    })
-})
 
 app1.get('/user/getWellnessData',function(req,res){
     var date = new Date()
@@ -529,7 +466,7 @@ app1.get('/user/getDietData',function(req,res){
     var date = new Date()
         dietData.findOne({email:req.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
         if(err){
-            console.log(err+'www')
+            console.log(err)
         }else{
             res.send(data)
         }
@@ -538,7 +475,6 @@ app1.get('/user/getDietData',function(req,res){
 
 
 app1.get('/user/diet',isAuth,function(req,res){
-    console.log(userEmail)
     fetch('http://localhost:1111/user/getDietData')
     .then((data)=>{
         return data.text()
@@ -759,11 +695,16 @@ app1.post('/logIn/request',passport.authenticate('local', {failureRedirect:'/log
 */
 
 
-app1.post('/login', passport.authenticate('local',{
-    successRedirect:'/user/diet',
-    failureRedirect:'/login'
-    //implement flash
-}))
+app1.post('/login',passport.authenticate('local',
+{
+        successRedirect:'/user/diet',
+        failureRedirect:'/login',
+        
+
+})
+
+
+)
 
 function cleanInput(userInput){
     var cleanText = sanitizeHtml(userInput,{
@@ -789,7 +730,7 @@ app1.get('/logout',function(req,res,next){
         if(err){
             console.log(err)
         }else{
-            res.redirect('http://localhost:1111/')
+            res.redirect('/')
 
         }
     });
