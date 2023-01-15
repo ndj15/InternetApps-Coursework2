@@ -6,54 +6,6 @@ mongoose.connect('mongodb://localhost:27017/HealthyLife')
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 const session = require('express-session')
-/*
-function init(passport, getByEmail,getByID){
-    const authUser = async(email,password,done)=>{
-        const user = getByEmail(email)
-        console.log(user)
-        console.log(user)
-        if (user == null){//no users found
-            console.log('no user with email')
-            return done(null,false)
-            //return error message
-        }
-        try{
-            console.log(password+'pass')
-            console.log(user.password+'user ob')
-            if(await bcrypt.compare(password,user.password)){//success
-                return done(null,user)
-                //sanitiza this password
-
-            }else{//password doesnt match
-                console.log('password doesnt match')
-                return done(null,false)
-
-            }
-        }
-        catch(e){
-            return done(e)
-
-        }
-    }
-
-    passport.use(new LocalStrategy({
-        usernameField:'email',
-        passwordField:'password'
-    },authUser))
-
-    passport.serializeUser((user,done)=>{
-        return done(null,user.id)
-
-    })
-    passport.deserializeUser((id,done)=>{
-        return done(null,getById(id))
-        
-    })
-}
-
-module.exports = init
-*/
-
 
 passport.serializeUser((user,done)=>{
     done(null,user.id)
