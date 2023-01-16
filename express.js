@@ -19,7 +19,7 @@ const users = require('./Users.model.js')
 const dietData = require('./userDiet-model.js');
 const fitness = require('./UserFitness-model.js')
 const wellness = require('./UserMentalH-model.js')
-const { loadavg } = require('os');
+const { loadavg, devNull } = require('os');
 const { json } = require('express');
 const { validate } = require('./userDiet-model.js');
 const { resolveCaa } = require('dns');
@@ -39,7 +39,9 @@ const LocalStrategy = require('passport-local').Strategy;
 const initPass = require('./passport-conf')
 const flash = require('express-flash')
 const session = require('express-session')
-const local = require('./passport-conf')
+const local = require('./passport-conf');
+const methodOverride = require('method-override');
+const { error } = require('console');
 app1.use(session({
     secret: process.env.SECRET,
     resave: false,
@@ -76,7 +78,10 @@ function databaseInsert(formEmail,formFname,formLname,formPassword){
     console.log('complete')
 }
 
+app1.get('/',function(req,res){
+    res.redirect('http://localhost:1111/html/index.html')
 
+})
 
 app1.get('/login',function(req,res){
     res.redirect('http://localhost:1111/html/logIn.html')
@@ -125,9 +130,9 @@ app1.post('/signUp/createUser', function(req,res){
 
 
 
-app1.get('/user/getWellnessData',function(req,res){
+app1.get('/user/getWellnessData',isAuth,function(req,res){
     var date = new Date()
-        wellness.findOne({email:userEmail,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
+        wellness.findOne({email:req.user.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
         if(err){
             console.log(err)
         }else{
@@ -224,7 +229,7 @@ app1.get('/user/getWellnessData',function(req,res){
     
     })
 
-app1.post('/user/wellness/submitWellnessData',function(req,res){
+app1.post('/user/wellness/submitWellnessData',isAuth,function(req,res){
     var date = new Date()
     fetch('http://localhost:1111/user/getWellnessData')
     .then((response)=>{ // database empty?
@@ -264,7 +269,7 @@ app1.post('/user/wellness/submitWellnessData',function(req,res){
             console.log(data)
             if (data != false){
                wellness.create({
-                email:userEmail,
+                email:req.user.email,
                 date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString(),
                 rating: data[0],
                 sleepHrs: data[1],
@@ -286,10 +291,10 @@ app1.post('/user/wellness/submitWellnessData',function(req,res){
         console.log(err)
     })
 })
-
-app1.get('/user/getFitnessData',function(req,res){
+/*
+app1.get('/user/getFitnessData',isAuth,function(req,res){
     var date = new Date()
-        fitness.findOne({email:userEmail,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
+        fitness.findOne({email:req.user.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
         if(err){
             console.log(err)
         }else{
@@ -297,8 +302,8 @@ app1.get('/user/getFitnessData',function(req,res){
         }
     })})
 
-
- app1.get('/user/fitness',function(req,res){
+*/
+ app1.get('/user/fitness',isAuth,function(req,res){
         fetch('http://localhost:1111/user/getFitnessData')
         .then((data)=>{
             return data.text()
@@ -393,7 +398,7 @@ app1.get('/user/getFitnessData',function(req,res){
     
     })
 
-app1.post('/user/fitness/submitFitnessData',function(req,res){
+app1.post('/user/fitness/submitFitnessData',isAuth,function(req,res){
     var date = new Date()
     fetch('http://localhost:1111/user/getFitnessData')
     .then((response)=>{ // database empty?
@@ -434,7 +439,7 @@ app1.post('/user/fitness/submitFitnessData',function(req,res){
             console.log(data)
             if (data != false){
                fitness.create({
-                email:userEmail,
+                email:req.user.email,
                 date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString(),
                 steps: req.body.stepCount,
                 caloriesBurned: req.body.calBurned,
@@ -459,38 +464,180 @@ app1.post('/user/fitness/submitFitnessData',function(req,res){
     })
 })
 
-
-//return entry in table with email and today's date
-app1.get('/user/getDietData',function(req,res){
+/*
+app1.get('/user/getDietData',(req,res)=>{
     var date = new Date()
-        dietData.findOne({email:req.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
+    console.log(req.user + '2')
+    dietData.findOne({email:req.user.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},(err,data)=>{
         if(err){
             console.log(err)
         }else{
+            console.log(req.user.email)
             res.send(data)
+
         }
+
+
     })})
+*/
 
 
+app1.get('/user/diet',isAuth, async function(req,res){
+/*
+fetch('http://localhost:1111/user/getDietData')
+.then(data=>{
+    console.log(data.text())
+    return data.text()
 
-app1.get('/user/diet',isAuth,function(req,res){
-    fetch('http://localhost:1111/user/getDietData')
-    .then((data)=>{
-        return data.text()
+    
+}).then(data=>{
+    var d = data
+    console.log(d+'2')
 
-    }).then((text)=>{
-        if(text.length > 1){//if there is a value
-            return JSON.parse(text)
+    return JSON.parse(d)
+
+
+}).then(data=>{
+    console.log(data + '1')
+
+})})
+*/
+var date = new Date()
+dietData.findOne({email:req.user.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},(err,data)=>{
+    if(err){
+        console.log(err)
+    }else{
+        console.log(data)
+        if(data!= null){
+            console.log(req.user.email)
+            if(data.calIntake < 1500){//under cals
+                if(data.alcConsumed < 30){// less cals and drinkning moderately
+                    res.render('diet.ejs',{
+                        numOfMeals: data.mealNo,
+                        calInt:data.calIntake,
+                        alcCon:data.alcConsumed,
+                        link1:"https://www.healthline.com/nutrition/1500-calorie-diet",
+                        link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
+                    
+                        
+                    })
+                }else{// less cals and drinking a lot
+                    res.render('diet.ejs',{
+                        numOfMeals: data.mealNo,
+                        calInt:data.calIntake,
+                        alcCon:data.alcConsumed,
+                        link1:"https://www.healthline.com/nutrition/1500-calorie-diet",
+                        link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
+                    })
+                }
+            }else if(data.calIntake < 2500 && data.calIntake > 1500){ // eating the right amount of calories 
+                if(data.alcConsumed < 3){//over eating but long term drinking
+                    res.render('diet.ejs',{
+                        numOfMeals: data.mealNo,
+                        calInt:data.calIntake,
+                        alcCon:data.alcConsumed,
+                        link1:"https://www.who.int/initiatives/behealthy/healthy-diet",
+                        link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
+                    
+                        
+                    })
+                
+                }else{//more than 2500 calories
+                    if(data.alcConsumed < 3){//over eating but drinking in moderation
+                        res.render('diet.ejs',{
+                            numOfMeals: data.mealNo,
+                            calInt:data.calIntake,
+                            alcCon:data.alcConsumed,
+                            link1:"https://www.livestrong.com/article/478687-the-effects-of-too-many-calories/",
+                            link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
+      
+                        })
+                    
+                    }else{ // over eating and over drinking
+                        res.render('diet.ejs',{
+                            numOfMeals: data.mealNo,
+                            calInt:data.calIntake,
+                            alcCon:data.alcConsumed,
+                            link1:'https://www.livestrong.com/article/478687-the-effects-of-too-many-calories/',
+                            link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
+                        
+                            
+                        })
+    
+    
+                    }
+    
+                }
+
+        }
+
         }
         else{
-
-            return false
+            res.render('diet.ejs',{
+                numOfMeals: "Not Submitted for today",
+                calInt:"Not Submitted for today",
+                alcCon:"Not Submitted for today",
+                link1:"",
+                link2:"",
+                    
+                })
         }
-        
-    }).then((data)=>{
 
-        if(data != false){// if there is data
+    }})
+})
+    /*
+        if  (data){
+            console.log(req.user.email) 
             console.log(data)
+            if(data.calIntake < 1500){//under cals
+                if(data.alcConsumed < 30){// less cals and drinkning moderately
+                    res.render('diet.ejs',{
+                        numOfMeals: data.mealNo,
+                        calInt:data.calIntake,
+                        alcCon:data.alcConsumed,
+                        link1:"https://www.healthline.com/nutrition/1500-calorie-diet",
+                        link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
+                    
+                        
+                    })
+                }else{// less cals and drinking a lot
+                    res.render('diet.ejs',{
+                        numOfMeals: data.mealNo,
+                        calInt:data.calIntake,
+                        alcCon:data.alcConsumed,
+                        link1:"https://www.healthline.com/nutrition/1500-calorie-diet",
+                        link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
+                    })
+                }
+            }
+            else if(data.calIntake < 2500 && data.calIntake > 1500){ // eating the right amount of calories 
+                if(data.alcConsumed < 3){//over eating but long term drinking
+                    res.render('diet.ejs',{
+                        numOfMeals: data.mealNo,
+                        calInt:data.calIntake,
+                        alcCon:data.alcConsumed,
+                        link1:"https://www.who.int/initiatives/behealthy/healthy-diet",
+                        link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
+                    
+                        
+                    })
+                
+                }else{ // over eating and over drinking
+                    res.render('diet.ejs',{
+                        numOfMeals: data.mealNo,
+                        calInt:data.calIntake,
+                        alcCon:data.alcConsumed,
+                        link1:'https://www.who.int/initiatives/behealthy/healthy-diet',
+                        link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
+                    
+                        
+                    })
+                }
+
+        }
+       
+        
+        if(data != false){// if there is data
             if(data.calIntake < 1500){//under cals
                 if(data.alcConsumed < 30){// less cals and drinkning moderately
                     res.render('diet.ejs',{
@@ -537,9 +684,6 @@ app1.get('/user/diet',isAuth,function(req,res){
 
 
                 }
-            
-    
-                
             }else{//more than 2500 calories
                 if(data.alcConsumed < 3){//over eating but drinking in moderation
                     res.render('diet.ejs',{
@@ -567,33 +711,34 @@ app1.get('/user/diet',isAuth,function(req,res){
 
             }
         }
-        
-        else{
-            res.render('diet.ejs',{
-                numOfMeals: "Not Submitted for today",
-                calInt:"Not Submitted for today",
-                alcCon:"Not Submitted for today",
-                link1:"",
-                link2:"",
-                    
-                })
-        }})
-    
-    
-    
-    
-    
-    .catch(err=>{
-
-    console.log(err)
+} else {
+    console.log('no data')
+    res.render('diet.ejs',{
+        numOfMeals: "Not Submitted for today",
+        calInt:"Not Submitted for today",
+        alcCon:"Not Submitted for today",
+        link1:"",
+        link2:"",
+            
+        })
+}
 
 })
+/*    
 
-})
+app1.get('/user/getDietData',function(req,res){
+    console.log('get diet data')
+    console.log(req.user)
+    var date = new Date()
+        dietData.findOne({email:req.user.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
+        if(err){
+            console.log(err)
+        }else{
+            res.send(data)
+        }
+    })})
 
-
-
-app1.post('/user/diet/submitDietData',function(req,res){
+app1.post('/user/diet/submitDietData',isAuth,function(req,res){
     var date = new Date()
     fetch('http://localhost:1111/user/getDietData')
     .then((response)=>{ // database empty?
@@ -716,7 +861,6 @@ function cleanInput(userInput){
 
 function isAuth(req,res,next){
     if(req.isAuthenticated()){
-        console.log(req.user)
         return next()
     }else{
         res.redirect('/login')
@@ -725,15 +869,17 @@ function isAuth(req,res,next){
 
 }
 
-app1.get('/logout',function(req,res,next){
-    req.logout(function(err){
-        if(err){
-            console.log(err)
-        }else{
-            res.redirect('/')
 
+app1.get('/logout',function(req,res,next){
+    req.logout(err=>{
+        if(err){
+            res.send(err)
+        }else{
+            res.redirect('/') 
         }
-    });
+
+    })
+   
 })
 
 app1.listen(port,function(err){
