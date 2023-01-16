@@ -64,8 +64,6 @@ app1.use(passport.initialize())
 app1.use(passport.session())
 
 
-
-
 function databaseInsert(formEmail,formFname,formLname,formPassword){
     console.log(formEmail)
     console.log('attempting insertion')
@@ -90,7 +88,6 @@ app1.get('/login',function(req,res){
 app1.get('/signUp',function(req,res){
     res.redirect("http://localhost:1111/html/SignUp.html")
 })
-
 
 app1.post('/signUp/createUser', function(req,res){
 //email check
@@ -127,38 +124,13 @@ app1.post('/signUp/createUser', function(req,res){
     }) 
 })
 
-
-
-
-app1.get('/user/getWellnessData',isAuth,function(req,res){
-    var date = new Date()
-        wellness.findOne({email:req.user.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
-        if(err){
-            console.log(err)
-        }else{
-            res.send(data)
-        }
-    })})
-
-
  app1.get('/user/wellness',isAuth,function(req,res){ 
-        fetch('http://localhost:1111/user/getWellnessData')
-        .then((data)=>{
-            return data.text()
-    
-        }).then((text)=>{
-            if(text.length > 1){//if there is a value
-        
-                return JSON.parse(text)
-            }
-            else{
-               
-                return false
-            }
-            
-        }).then((data)=>{
-    
-            if(data != false){// if there is data
+    var date = new Date()
+    wellness.findOne({email:req.user.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},(err,data)=>{
+        if(err){
+            res.send(err)
+        }else{
+            if(data != null){
                 if(data.rating < 5){//rating less that 5
                     if(data.sleepHrs < 6){// less than 5 and less than 6 hrs sleep
                         res.render('wellness.ejs',{
@@ -177,341 +149,167 @@ app1.get('/user/getWellnessData',isAuth,function(req,res){
                             social:data.social,
                             link1:"https://www.nhs.uk/mental-health/self-help/tips-and-support/how-to-be-happier/",
                             link2:"https://www.cdc.gov/sleep/about_sleep/sleep_hygiene.html",
-                        
-                            
                         })
                     }
-                }
-                else{ // rating more than 5
+                }else{ // rating more than 5
                     if(data.sleepHrs < 30){// good rating but bad sleep
                         res.render('wellness.ejs',{
                             rating: data.rating,
                             sleepHrs:data.sleepHrs ,
                             social:data.social,
                             link1:"https://www.healthline.com/health/how-to-be-happy",
-                            link2:"https://www.cdc.gov/sleep/about_sleep/sleep_hygiene.html",
-                        
-                            
+                            link2:"https://www.cdc.gov/sleep/about_sleep/sleep_hygiene.html",  
                         })
-                    
                     }else{ // good rating and good sleep
                         res.render('wellness.ejs',{
                             rating: data.rating,
                             sleepHrs:data.sleepHrs ,
                             social:data.social,
                             link1:"https://www.healthline.com/health/how-to-be-happy",
-                            link2:"https://www.cdc.gov/sleep/about_sleep/sleep_hygiene.html",
-                        
-                            
+                            link2:"https://www.cdc.gov/sleep/about_sleep/sleep_hygiene.html",       
                         })
                     }
-        
-        
                 }
-            }
-            
-            else{
+
+            }else{
                 res.render('wellness.ejs',{
                     rating: "Not Submitted for today",
                     sleepHrs:"Not Submitted for today",
                     social:"Not Submitted for today",
                     link1:"",
                     link2:"",
-                
-                    
                 })
-            }})
-        .catch(err=>{
-    
-        console.log(err)
-    
+            }
+        }
     })
+})
     
-    })
-
 app1.post('/user/wellness/submitWellnessData',isAuth,function(req,res){
     var date = new Date()
-    fetch('http://localhost:1111/user/getWellnessData')
-    .then((response)=>{ // database empty?
-        return response.text()
-    }).then((data)=>{// if entry exists
-         if(data.length > 1){
-            return data
+    wellness.findOne({
+        email:req.user.email,
+        date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()
+    },(err,data)=>{
+        if(err){
+            res.send(err)
         }else{
-            return false
-
-        }
-        
-    }).then((text)=>{ // if there is an entry for today 
-        if(text != false){
-            console.log(JSON.parse(text))
-            return true
-        }else{
-            
-            return false
-        }
-        
-    }).then((data)=>{
-        if(data != true){
-            var values = []
-            values[0] = cleanInput(req.body.rating)
-            values[1] = cleanInput(req.body.sleep)
-            values[2] = cleanInput(req.body.social)
-            return values
-            
-        }else{
-            return false
-
-        }
-        
-         // turn into useable numbers from json
-          }).then((data)=>{
-            console.log(data)
-            if (data != false){
-               wellness.create({
-                email:req.user.email,
-                date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString(),
-                rating: data[0],
-                sleepHrs: data[1],
-                social: data[2]
-    
-                        })
-                res.redirect('http://localhost:1111/user/wellness')
-            }
-            else{
-
+            if(data!=null){
                 res.render('submitted.ejs',{
-                    previousPage: 'http://localhost:1111/user/wellness'
-
+                    previousPage:'http://localhost:1111/user/wellness'
                 })
-
+            }else{
+                wellness.create({
+                    email:req.user.email,
+                    date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString(),
+                    rating:cleanInput(req.body.rating),
+                    sleepHrs:cleanInput(req.body.sleep),
+                    social:cleanInput(req.body.social),
+                })
+                res.redirect('/user/wellness')
             }
-    }).catch((err)=>{
-
-        console.log(err)
+        }
     })
 })
-/*
-app1.get('/user/getFitnessData',isAuth,function(req,res){
-    var date = new Date()
-        fitness.findOne({email:req.user.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
-        if(err){
-            console.log(err)
-        }else{
-            res.send(data)
-        }
-    })})
 
-*/
  app1.get('/user/fitness',isAuth,function(req,res){
-        fetch('http://localhost:1111/user/getFitnessData')
-        .then((data)=>{
-            return data.text()
-    
-        }).then((text)=>{
-            if(text.length > 1){//if there is a value
-             
-                return JSON.parse(text)
-            }
-            else{
-               
-                return false
-            }
-            
-        }).then((data)=>{
-    
-        if(data != false){// if there is data
-            console.log(data)
-            if(data.steps < 5000){//steps less than 5000
-                if(data.exercise < 30){// less than 5000 steps and less than 30 mins exercise
-                    res.render('fitness.ejs',{
-                        steps: data.steps,
-                        calories:data.caloriesBurned ,
-                        active:data.exercise,
-                        link1:"https://www.ageuk.org.uk/northern-ireland/information-advice/health-wellbeing/fitness/walking-tips-advice/#:~:text=Simple%20tips%20for%20successful%20walking%20exercise%201%201.,outdoors%20...%206%206.%20Wear%20thin%20layers%20",
-                        link2:"https://www.nhs.uk/live-well/exercise/",
-                    
-                        
-                    })
-                }else{// less than 5000 but does good amount of exercise
-                    res.render('fitness.ejs',{
-                        steps: data.steps,
-                        calories:data.caloriesBurned ,
-                        active:data.exercise,
-                        link1:"https://www.bbc.co.uk/programmes/articles/51SPhn5FKSYRnQNswfnWsN2/8-reasons-why-we-should-all-walk-more#:~:text=Six%20tips%20for%20how%20to%20walk%20more%20during,around%20when%20you%E2%80%99re%20on%20the%20call.%20More%20items",
-                        link2:"https://www.nia.nih.gov/health/staying-motivated-exercise-tips-older-adults",
-                    
-                        
-                    })
-                }
-            }
-            else{ // steps more than 5000
-                if(data.exercise < 30){//more than 5000 but no many active minutes
-                    res.render('fitness.ejs',{
-                        steps: data.steps,
-                        calories:data.caloriesBurned ,
-                        active:data.exercise,
-                        link1:"https://www.healthline.com/health/how-to-walk#:~:text=Tips%20for%20walking%20properly%201%20Keep%20your%20head,...%206%20Step%20from%20heel%20to%20toe%20",
-                        link2:"https://darebee.com/fitness/how-to-exercise-more.html#:~:text=What%20should%20we%20do%20to%20exercise%20more%3F%201,you%20need%20to%20go%20flat-out%20in%20intensity.%20",
-                    
-                        
-                    })
-                
-                }else{ // more than 5000 steps and active individual
-                    res.render('fitness.ejs',{
-                        steps: data.steps,
-                        calories:data.caloriesBurned ,
-                        active:data.exercise,
-                        link1:"https://www.healthline.com/health/how-to-walk#:~:text=Tips%20for%20walking%20properly%201%20Keep%20your%20head,...%206%20Step%20from%20heel%20to%20toe%20",
-                        link2:"https://www.nia.nih.gov/health/staying-motivated-exercise-tips-older-adults",
-                    
-                        
-                    })
+    var date = new Date()
+    fitness.findOne({email:req.user.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},(err,data)=>{
+        if(err){
+            console.log('error' + err)
 
-
+        }else{
+            if(data != null){
+                if(data.steps <= 5000){//steps less than 5000
+                    if(data.exercise < 30){// less than 5000 steps and less than 30 mins exercise
+                        res.render('fitness.ejs',{
+                            steps: data.steps,
+                            calories:data.caloriesBurned ,
+                            active:data.exercise,
+                            link1:"https://www.ageuk.org.uk/northern-ireland/information-advice/health-wellbeing/fitness/walking-tips-advice/#:~:text=Simple%20tips%20for%20successful%20walking%20exercise%201%201.,outdoors%20...%206%206.%20Wear%20thin%20layers%20",
+                            link2:"https://www.nhs.uk/live-well/exercise/",
+                        
+                            
+                        })
+                    }else{// less than 5000 but does good amount of exercise
+                        res.render('fitness.ejs',{
+                            steps: data.steps,
+                            calories:data.caloriesBurned ,
+                            active:data.exercise,
+                            link1:"https://www.bbc.co.uk/programmes/articles/51SPhn5FKSYRnQNswfnWsN2/8-reasons-why-we-should-all-walk-more#:~:text=Six%20tips%20for%20how%20to%20walk%20more%20during,around%20when%20you%E2%80%99re%20on%20the%20call.%20More%20items",
+                            link2:"https://www.nia.nih.gov/health/staying-motivated-exercise-tips-older-adults",
+                        
+                            
+                        })
+                    }
                 }
-    
-    
+            else if(data.steps > 5000){ // steps more than 5000
+                    if(data.exercise < 30){//more than 5000 but no many active minutes
+                        res.render('fitness.ejs',{
+                            steps: data.steps,
+                            calories:data.caloriesBurned ,
+                            active:data.exercise,
+                            link1:"https://www.healthline.com/health/how-to-walk#:~:text=Tips%20for%20walking%20properly%201%20Keep%20your%20head,...%206%20Step%20from%20heel%20to%20toe%20",
+                            link2:"https://darebee.com/fitness/how-to-exercise-more.html#:~:text=What%20should%20we%20do%20to%20exercise%20more%3F%201,you%20need%20to%20go%20flat-out%20in%20intensity.%20", 
+                        })
+                    
+                    }else{ // more than 5000 steps and active individual
+                        res.render('fitness.ejs',{
+                            steps: data.steps,
+                            calories:data.caloriesBurned ,
+                            active:data.exercise,
+                            link1:"https://www.healthline.com/health/how-to-walk#:~:text=Tips%20for%20walking%20properly%201%20Keep%20your%20head,...%206%20Step%20from%20heel%20to%20toe%20",
+                            link2:"https://www.nia.nih.gov/health/staying-motivated-exercise-tips-older-adults",
+                        })
+                    }
+            }
+        }else{
+            res.render('fitness.ejs',{
+                steps: "Not Submitted Today",
+                calories:"Not Submitted Today" ,
+                active:"Not Submitted Today",
+                link1:'',
+                link2:'',
+                })
             }
         }
-        
-        else{
-            res.render('fitness.ejs',{
-                    steps: "Not Submitted Today",
-                    calories:"Not Submitted Today" ,
-                    active:"Not Submitted Today",
-                    link1:'',
-                    link2:'',
-                    
-                })
-        }})
-    
-    
-    
-    
-    
-    .catch(err=>{
-    
-        console.log(err)
-    
     })
-    
-    })
-
+})
 app1.post('/user/fitness/submitFitnessData',isAuth,function(req,res){
     var date = new Date()
-    fetch('http://localhost:1111/user/getFitnessData')
-    .then((response)=>{ // database empty?
-        return response.text()
-    }).then((data)=>{// if entry exists
-        console.log('data:' + data)
-         if(data.length > 1){
-            return data
+    fitness.findOne({
+        email:req.user.email,
+        date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()
+    },(err,data)=>{
+        if(err){
+            res.send(err)
         }else{
-            return false
-
-        }
-        
-    }).then((text)=>{ // if there is an entry for today 
-        if(text != false){
-            console.log(JSON.parse(text))
-            return true
-        }else{
-            
-            return false
-        }
-        
-    }).then((data)=>{
-        if(data != true){
-            var values = []
-            values[0] = cleanInput(req.body.stepCount)
-            values[1] = cleanInput(req.body.calBurned)
-            values[2] = cleanInput(req.body.exercise)
-            return values
-            
-        }else{
-            return false
-
-        }
-        
-         // turn into useable numbers from json
-          }).then((data)=>{
-            console.log(data)
-            if (data != false){
-               fitness.create({
-                email:req.user.email,
-                date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString(),
-                steps: req.body.stepCount,
-                caloriesBurned: req.body.calBurned,
-                exercise: req.body.exercise
-    
-                        })
-
-                    
-                res.redirect('http://localhost:1111/user/fitness')
-            }
-            else{
-
+            if(data!=null){
                 res.render('submitted.ejs',{
-                    previousPage: 'http://localhost:1111/user/fitness'
-
+                    previousPage:'http://localhost:1111/user/fitness'
                 })
-
+            }else{
+                fitness.create({
+                    email:req.user.email,
+                    date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString(),
+                    steps:cleanInput(req.body.stepCount),
+                    caloriesBurned:cleanInput(req.body.calBurned),
+                    exercise:cleanInput(req.body.exercise),
+                })
+                res.redirect('/user/fitness')
             }
-    }).catch((err)=>{
-
-        console.log(err)
+        }
     })
 })
-
-/*
-app1.get('/user/getDietData',(req,res)=>{
-    var date = new Date()
-    console.log(req.user + '2')
-    dietData.findOne({email:req.user.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},(err,data)=>{
-        if(err){
-            console.log(err)
-        }else{
-            console.log(req.user.email)
-            res.send(data)
-
-        }
-
-
-    })})
-*/
-
-
+        
 app1.get('/user/diet',isAuth, async function(req,res){
-/*
-fetch('http://localhost:1111/user/getDietData')
-.then(data=>{
-    console.log(data.text())
-    return data.text()
-
-    
-}).then(data=>{
-    var d = data
-    console.log(d+'2')
-
-    return JSON.parse(d)
-
-
-}).then(data=>{
-    console.log(data + '1')
-
-})})
-*/
 var date = new Date()
 dietData.findOne({email:req.user.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},(err,data)=>{
     if(err){
-        console.log(err)
+        res.send(err)
     }else{
-        console.log(data)
         if(data!= null){
-            console.log(req.user.email)
-            if(data.calIntake < 1500){//under cals
-                if(data.alcConsumed < 30){// less cals and drinkning moderately
+            if(data.calIntake < 1500){//calories under 1500
+                if(data.alcConsumed < 3){// under eating but drinking in moderation
                     res.render('diet.ejs',{
                         numOfMeals: data.mealNo,
                         calInt:data.calIntake,
@@ -521,7 +319,7 @@ dietData.findOne({email:req.user.email,date:date.getFullYear().toString() + date
                     
                         
                     })
-                }else{// less cals and drinking a lot
+                }else{// under eating and drinking a lot
                     res.render('diet.ejs',{
                         numOfMeals: data.mealNo,
                         calInt:data.calIntake,
@@ -531,18 +329,29 @@ dietData.findOne({email:req.user.email,date:date.getFullYear().toString() + date
                     })
                 }
             }else if(data.calIntake < 2500 && data.calIntake > 1500){ // eating the right amount of calories 
-                if(data.alcConsumed < 3){//over eating but long term drinking
+                if(data.alcConsumed < 3){//eating right and low drinking
                     res.render('diet.ejs',{
                         numOfMeals: data.mealNo,
                         calInt:data.calIntake,
                         alcCon:data.alcConsumed,
                         link1:"https://www.who.int/initiatives/behealthy/healthy-diet",
                         link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
-                    
-                        
                     })
                 
-                }else{//more than 2500 calories
+                
+                }else{//eating right but overdrinking
+                    res.render('diet.ejs',{
+                        numOfMeals: data.mealNo,
+                        calInt:data.calIntake,
+                        alcCon:data.alcConsumed,
+                        link1:"https://www.who.int/initiatives/behealthy/healthy-diet",
+                        link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
+                    })
+
+                }
+                
+            }
+            else{//more than 2500 calories
                     if(data.alcConsumed < 3){//over eating but drinking in moderation
                         res.render('diet.ejs',{
                             numOfMeals: data.mealNo,
@@ -569,275 +378,47 @@ dietData.findOne({email:req.user.email,date:date.getFullYear().toString() + date
     
                 }
 
-        }
-
-        }
-        else{
-            res.render('diet.ejs',{
-                numOfMeals: "Not Submitted for today",
-                calInt:"Not Submitted for today",
-                alcCon:"Not Submitted for today",
-                link1:"",
-                link2:"",
-                    
-                })
-        }
-
-    }})
-})
-    /*
-        if  (data){
-            console.log(req.user.email) 
-            console.log(data)
-            if(data.calIntake < 1500){//under cals
-                if(data.alcConsumed < 30){// less cals and drinkning moderately
-                    res.render('diet.ejs',{
-                        numOfMeals: data.mealNo,
-                        calInt:data.calIntake,
-                        alcCon:data.alcConsumed,
-                        link1:"https://www.healthline.com/nutrition/1500-calorie-diet",
-                        link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
-                    
-                        
-                    })
-                }else{// less cals and drinking a lot
-                    res.render('diet.ejs',{
-                        numOfMeals: data.mealNo,
-                        calInt:data.calIntake,
-                        alcCon:data.alcConsumed,
-                        link1:"https://www.healthline.com/nutrition/1500-calorie-diet",
-                        link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
-                    })
-                }
-            }
-            else if(data.calIntake < 2500 && data.calIntake > 1500){ // eating the right amount of calories 
-                if(data.alcConsumed < 3){//over eating but long term drinking
-                    res.render('diet.ejs',{
-                        numOfMeals: data.mealNo,
-                        calInt:data.calIntake,
-                        alcCon:data.alcConsumed,
-                        link1:"https://www.who.int/initiatives/behealthy/healthy-diet",
-                        link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
-                    
-                        
-                    })
-                
-                }else{ // over eating and over drinking
-                    res.render('diet.ejs',{
-                        numOfMeals: data.mealNo,
-                        calInt:data.calIntake,
-                        alcCon:data.alcConsumed,
-                        link1:'https://www.who.int/initiatives/behealthy/healthy-diet',
-                        link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
-                    
-                        
-                    })
-                }
-
-        }
-       
-        
-        if(data != false){// if there is data
-            if(data.calIntake < 1500){//under cals
-                if(data.alcConsumed < 30){// less cals and drinkning moderately
-                    res.render('diet.ejs',{
-                        numOfMeals: data.mealNo,
-                        calInt:data.calIntake,
-                        alcCon:data.alcConsumed,
-                        link1:"https://www.healthline.com/nutrition/1500-calorie-diet",
-                        link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
-                    
-                        
-                    })
-                }else{// less cals and drinking a lot
-                    res.render('diet.ejs',{
-                        numOfMeals: data.mealNo,
-                        calInt:data.calIntake,
-                        alcCon:data.alcConsumed,
-                        link1:"https://www.healthline.com/nutrition/1500-calorie-diet",
-                        link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
-                    })
-                }
-            }
-            else if(data.calIntake < 2500 && data.calIntake > 1500){ // eating the right amount of calories 
-                if(data.alcConsumed < 3){//over eating but long term drinking
-                    res.render('diet.ejs',{
-                        numOfMeals: data.mealNo,
-                        calInt:data.calIntake,
-                        alcCon:data.alcConsumed,
-                        link1:"https://www.who.int/initiatives/behealthy/healthy-diet",
-                        link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
-                    
-                        
-                    })
-                
-                }else{ // over eating and over drinking
-                    res.render('diet.ejs',{
-                        numOfMeals: data.mealNo,
-                        calInt:data.calIntake,
-                        alcCon:data.alcConsumed,
-                        link1:'https://www.who.int/initiatives/behealthy/healthy-diet',
-                        link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
-                    
-                        
-                    })
-
-
-                }
-            }else{//more than 2500 calories
-                if(data.alcConsumed < 3){//over eating but drinking in moderation
-                    res.render('diet.ejs',{
-                        numOfMeals: data.mealNo,
-                        calInt:data.calIntake,
-                        alcCon:data.alcConsumed,
-                        link1:"https://www.livestrong.com/article/478687-the-effects-of-too-many-calories/",
-                        link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
-  
-                    })
-                
-                }else{ // over eating and over drinking
-                    res.render('diet.ejs',{
-                        numOfMeals: data.mealNo,
-                        calInt:data.calIntake,
-                        alcCon:data.alcConsumed,
-                        link1:'https://www.livestrong.com/article/478687-the-effects-of-too-many-calories/',
-                        link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
-                    
-                        
-                    })
-
-
-                }
-
-            }
-        }
-} else {
-    console.log('no data')
-    res.render('diet.ejs',{
-        numOfMeals: "Not Submitted for today",
-        calInt:"Not Submitted for today",
-        alcCon:"Not Submitted for today",
-        link1:"",
-        link2:"",
-            
-        })
-}
-
-})
-/*    
-
-app1.get('/user/getDietData',function(req,res){
-    console.log('get diet data')
-    console.log(req.user)
-    var date = new Date()
-        dietData.findOne({email:req.user.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},function(err,data){
-        if(err){
-            console.log(err)
         }else{
-            res.send(data)
+        res.render('diet.ejs',{
+            numOfMeals: "Not Submitted for today",
+            calInt:"Not Submitted for today",
+            alcCon:"Not Submitted for today",
+            link1:"",
+            link2:"",
+                
+            })
         }
+        }
+        
+
     })})
 
-app1.post('/user/diet/submitDietData',isAuth,function(req,res){
+app1.post('/user/diet/submitDietData',(req,res)=>{
     var date = new Date()
-    fetch('http://localhost:1111/user/getDietData')
-    .then((response)=>{ // database empty?
-        return response.text()
-    }).then((data)=>{// if entry exists
-        console.log('data:' + data)
-         if(data.length > 1){
-            return data
+    dietData.findOne({
+        email:req.user.email,
+        date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()
+    },(err,data)=>{
+        if(err){
+            res.send(err)
         }else{
-            return false
-
-        }
-        
-    }).then((text)=>{ // if there is an entry for today 
-        if(text != false){
-            console.log('entry for today already exists or you have not made your first entry')
-            console.log(JSON.parse(text))
-            return true
-        }else{
-            
-            return 
-        }
-        
-    }).then((data)=>{
-        if(data != true){
-            var values = []
-            values[0] = cleanInput(req.body.mealNo)
-            values[1] = cleanInput(req.body.calInt)
-            values[2] = cleanInput(req.body.alcCon)
-            return values
-            
-        }else{
-            return false
-
-        }
-        
-         // turn into useable numbers from json
-          }).then((data)=>{
-            if (data != false){
-               dietData.create({
-                email:userEmail,
-                date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString(),
-                mealNo: data[0],
-                calIntake: data[1],
-                alcConsumed: data[2]
-    
-                        })
-
-                    
-                res.redirect('http://localhost:1111/user/diet')
-            }
-            else{
-
+            if(data!=null){
                 res.render('submitted.ejs',{
-                    previousPage: 'http://localhost:1111/user/diet'
-
+                    previousPage:'http://localhost:1111/user/diet'
                 })
-
+            }else{
+                dietData.create({
+                    email:req.user.email,
+                    date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString(),
+                    mealNo:cleanInput(req.body.mealNo),
+                    calIntake:cleanInput(req.body.calInt),
+                    alcConsumed:cleanInput(req.body.alcCon),
+                })
+                res.redirect('/user/diet')
             }
-    }).catch((err)=>{
-
-        console.log(err)
+        }
     })
 })
-/*
-app1.post('/logIn/request',passport.authenticate('local', {failureRedirect:'/login', successRedirect:'/user/diet'}) ,function(req,res){
-
- users.findOne({email:cleanInput(req.body.email)}, async function(error,data){
-            if(error){
-                res.send(error)
-            }
-            else{
-                if(data==null){
-                    res.send('cannot find account associated to ' + req.body.email)
-                }
-                else{//finding email and password combination
-                    try{
-                        if(await bcrypt.compare(cleanInput(req.body.password), cleanInput(data.password))){
-                            //successfull login
-                            userEmail = cleanInput(req.body.email)
-                            
-                            
-                            res.redirect('http://localhost:1111/user/diet')
-
-                        }else{
-                            res.send("incorrect Password, Please try again")
-
-                        }
-
-                    }catch{
-                        res.status(500).send("ERROR")
-                    }
-                    
-                }
-            }
-})
-})
-*/
-
 
 app1.post('/login',passport.authenticate('local',
 {
@@ -846,9 +427,7 @@ app1.post('/login',passport.authenticate('local',
         //use flash for message
         
 
-})
-
-)
+}))
 
 function cleanInput(userInput){
     var cleanText = sanitizeHtml(userInput,{

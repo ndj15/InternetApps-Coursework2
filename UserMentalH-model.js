@@ -10,7 +10,6 @@ var userMentalData = new Schema({
   rating:Number,
   sleepHrs:Number,
   social:Number,
-  
 });
 
 // Creates a collection based on a specific structure
