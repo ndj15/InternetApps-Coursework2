@@ -14,7 +14,6 @@ const cors = require('cors')
 app1.use(express.static('public'))
 app1.use('/html',express.static(__dirname + '/Webpage'))
 app1.use(cors({origin: 'http://127.0.0.1:5500'}))
-var userEmail = undefined
 const users = require('./Users.model.js')
 const dietData = require('./userDiet-model.js');
 const fitness = require('./UserFitness-model.js')
@@ -50,14 +49,14 @@ app1.use(session({
 app1.get('/emailCheck',function(req,res){
     users.find({},function(err,data){
         if(err){
-
-            console.log(err + 'ddd')
+            console.log(err)
         }else{
             res.send(data)
 
         }
     })
 })
+
 
 
 app1.use(passport.initialize())
@@ -82,7 +81,7 @@ app1.get('/',function(req,res){
 })
 
 app1.get('/login',function(req,res){
-    res.redirect('http://localhost:1111/html/logIn.html')
+    res.redirect('http://localhost:1111/html/LogIn.html')
 
 })
 app1.get('/signUp',function(req,res){

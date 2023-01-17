@@ -1,7 +1,6 @@
 
 const form = document.getElementById('signUpForm')
 const email = document.getElementById('email')
-
 const password = document.getElementById('password')
 const passwordCheck = document.getElementById('passConfirm')
 const heading = document.getElementById('heading')
@@ -76,7 +75,7 @@ form.addEventListener('submit',event=>{
 
     }
 
-    if(password.value.length <= 2){
+    if(password.value.length <= 6){
         errPassLen.innerHTML = 'Password needs to be longer than 6 characters'
         errPassLen.style.color ='red'
         errCount+=1
@@ -97,7 +96,6 @@ form.addEventListener('submit',event=>{
         errMatch.innerHTML =''
         //clear all messages and post
     }
-    console.log(errCount)
     
    if(errCount > 0){
     event.preventDefault()
