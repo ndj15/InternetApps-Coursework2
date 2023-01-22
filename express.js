@@ -26,6 +26,7 @@ const { rejects } = require('assert');
 const { link } = require('fs');
 const sanitizeHtml = require('sanitize-html');
 
+
 var port = 1111;
 var db = 'mongodb://localhost:27017/HealthyLife';
 
@@ -40,6 +41,7 @@ const flash = require('express-flash')
 const session = require('express-session')
 const local = require('./passport-conf');
 const methodOverride = require('method-override');
+app1.use(methodOverride('_method'))
 const { error } = require('console');
 app1.use(session({
     secret: process.env.SECRET,
@@ -357,26 +359,16 @@ app1.post('/login',passport.authenticate('local',
 }))
 
 
-app1.get('/logout',function(req,res,next){
-    req.logout(err=>{
+app1.get('/logout',function(req,res){
+    req.logOut(err=>{
         if(err){
-            res.send(err)
-        }else{
-            req.session.destroy(err=>{
-                if(err){console.log(err)}
-                else{
-                    res.redirect('/') 
-
-                }
-
-            })
-            
+            console.log(err)
         }
+    })
+    res.redirect('/')
+         
 
     })
-   
-})
-
 
 
 app1.listen(port,function(err){
