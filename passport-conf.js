@@ -6,6 +6,7 @@ mongoose.connect('mongodb://localhost:27017/HealthyLife')
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 const session = require('express-session')
+const santize = require('sanitize-html')
 
 passport.serializeUser((user,done)=>{
     done(null,user.id)

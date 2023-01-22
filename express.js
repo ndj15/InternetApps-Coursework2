@@ -75,6 +75,23 @@ function databaseInsert(formEmail,formFname,formLname,formPassword){
     console.log('complete')
 }
 
+function cleanInput(userInput){
+    var cleanText = sanitizeHtml(userInput,{
+        allowedTags:[],
+        allowedAttributes:{}
+    })
+    return cleanText
+}
+
+function isAuth(req,res,next){
+    if(req.isAuthenticated()){
+        return next()
+    }else{
+        res.redirect('/login')
+    }
+
+
+}
 app1.get('/',function(req,res){
     res.redirect('http://localhost:1111/html/index.html')
 
@@ -132,52 +149,21 @@ app1.post('/signUp/createUser', function(req,res){
             if(data != null){
                 if(data.rating < 5){//rating less that 5
                     if(data.sleepHrs < 6){// less than 5 and less than 6 hrs sleep
-                        res.render('wellness.ejs',{
-                            rating: data.rating,
-                            sleepHrs:data.sleepHrs ,
-                            social:data.social,
-                            link1:"https://www.nhs.uk/mental-health/self-help/tips-and-support/how-to-be-happier/",
-                            link2:"https://www.healthshots.com/preventive-care/self-care/what-will-happen-if-you-sleep-for-less-than-6-hours/",
-                        
-                            
-                        })
+                        renderWellness(res,data.rating,data.sleepHrs,data.social,'https://www.nhs.uk/mental-health/self-help/tips-and-support/how-to-be-happier/','https://www.healthshots.com/preventive-care/self-care/what-will-happen-if-you-sleep-for-less-than-6-hours/')
                     }else{// less than 5 rating but more than 6 hrs sleep
-                        res.render('wellness.ejs',{
-                            rating: data.rating,
-                            sleepHrs:data.sleepHrs ,
-                            social:data.social,
-                            link1:"https://www.nhs.uk/mental-health/self-help/tips-and-support/how-to-be-happier/",
-                            link2:"https://www.cdc.gov/sleep/about_sleep/sleep_hygiene.html",
-                        })
+                        renderWellness(res,data.rating,data.sleepHrs,data.social,'https://www.nhs.uk/mental-health/self-help/tips-and-support/how-to-be-happier/','https://www.cdc.gov/sleep/about_sleep/sleep_hygiene.html')
                     }
+                    
                 }else{ // rating more than 5
                     if(data.sleepHrs < 30){// good rating but bad sleep
-                        res.render('wellness.ejs',{
-                            rating: data.rating,
-                            sleepHrs:data.sleepHrs ,
-                            social:data.social,
-                            link1:"https://www.healthline.com/health/how-to-be-happy",
-                            link2:"https://www.cdc.gov/sleep/about_sleep/sleep_hygiene.html",  
-                        })
+                        renderWellness(res,data.rating,data.sleepHrs,data.social,'https://www.healthline.com/health/how-to-be-happy','https://www.cdc.gov/sleep/about_sleep/sleep_hygiene.html')
                     }else{ // good rating and good sleep
-                        res.render('wellness.ejs',{
-                            rating: data.rating,
-                            sleepHrs:data.sleepHrs ,
-                            social:data.social,
-                            link1:"https://www.healthline.com/health/how-to-be-happy",
-                            link2:"https://www.cdc.gov/sleep/about_sleep/sleep_hygiene.html",       
-                        })
+                        renderWellness(res,data.rating,data.sleepHrs,data.social,'https://www.healthline.com/health/how-to-be-happy','https://www.cdc.gov/sleep/about_sleep/sleep_hygiene.html')
                     }
                 }
 
             }else{
-                res.render('wellness.ejs',{
-                    rating: "Not Submitted for today",
-                    sleepHrs:"Not Submitted for today",
-                    social:"Not Submitted for today",
-                    link1:"",
-                    link2:"",
-                })
+                renderWellness(res,"Not Submitted for today","Not Submitted for today","Not Submitted for today","","")
             }
         }
     })
@@ -220,55 +206,22 @@ app1.post('/user/wellness/submitWellnessData',isAuth,function(req,res){
             if(data != null){
                 if(data.steps <= 5000){//steps less than 5000
                     if(data.exercise < 30){// less than 5000 steps and less than 30 mins exercise
-                        res.render('fitness.ejs',{
-                            steps: data.steps,
-                            calories:data.caloriesBurned ,
-                            active:data.exercise,
-                            link1:"https://www.ageuk.org.uk/northern-ireland/information-advice/health-wellbeing/fitness/walking-tips-advice/#:~:text=Simple%20tips%20for%20successful%20walking%20exercise%201%201.,outdoors%20...%206%206.%20Wear%20thin%20layers%20",
-                            link2:"https://www.nhs.uk/live-well/exercise/",
-                        
-                            
-                        })
+                       
+                        renderFitness(res,data.steps,data.caloriesBurned,data.exercise,"https://www.ageuk.org.uk/northern-ireland/information-advice/health-wellbeing/fitness/walking-tips-advice/#:~:text=Simple%20tips%20for%20successful%20walking%20exercise%201%201.,outdoors%20...%206%206.%20Wear%20thin%20layers%20",'https://www.nhs.uk/live-well/exercise/')
                     }else{// less than 5000 but does good amount of exercise
-                        res.render('fitness.ejs',{
-                            steps: data.steps,
-                            calories:data.caloriesBurned ,
-                            active:data.exercise,
-                            link1:"https://www.bbc.co.uk/programmes/articles/51SPhn5FKSYRnQNswfnWsN2/8-reasons-why-we-should-all-walk-more#:~:text=Six%20tips%20for%20how%20to%20walk%20more%20during,around%20when%20you%E2%80%99re%20on%20the%20call.%20More%20items",
-                            link2:"https://www.nia.nih.gov/health/staying-motivated-exercise-tips-older-adults",
                         
-                            
-                        })
+                        renderFitness(res,data.steps,data.caloriesBurned,data.exercise,'https://www.bbc.co.uk/programmes/articles/51SPhn5FKSYRnQNswfnWsN2/8-reasons-why-we-should-all-walk-more#:~:text=Six%20tips%20for%20how%20to%20walk%20more%20during,around%20when%20you%E2%80%99re%20on%20the%20call.%20More%20items','https://www.nia.nih.gov/health/staying-motivated-exercise-tips-older-adults')
                     }
                 }
             else if(data.steps > 5000){ // steps more than 5000
                     if(data.exercise < 30){//more than 5000 but no many active minutes
-                        res.render('fitness.ejs',{
-                            steps: data.steps,
-                            calories:data.caloriesBurned ,
-                            active:data.exercise,
-                            link1:"https://www.healthline.com/health/how-to-walk#:~:text=Tips%20for%20walking%20properly%201%20Keep%20your%20head,...%206%20Step%20from%20heel%20to%20toe%20",
-                            link2:"https://darebee.com/fitness/how-to-exercise-more.html#:~:text=What%20should%20we%20do%20to%20exercise%20more%3F%201,you%20need%20to%20go%20flat-out%20in%20intensity.%20", 
-                        })
-                    
+                        renderFitness(res,data.steps,data.caloriesBurned,data.exercise,'https://www.healthline.com/health/how-to-walk#:~:text=Tips%20for%20walking%20properly%201%20Keep%20your%20head,...%206%20Step%20from%20heel%20to%20toe%20','https://darebee.com/fitness/how-to-exercise-more.html#:~:text=What%20should%20we%20do%20to%20exercise%20more%3F%201,you%20need%20to%20go%20flat-out%20in%20intensity.%20')
                     }else{ // more than 5000 steps and active individual
-                        res.render('fitness.ejs',{
-                            steps: data.steps,
-                            calories:data.caloriesBurned ,
-                            active:data.exercise,
-                            link1:"https://www.healthline.com/health/how-to-walk#:~:text=Tips%20for%20walking%20properly%201%20Keep%20your%20head,...%206%20Step%20from%20heel%20to%20toe%20",
-                            link2:"https://www.nia.nih.gov/health/staying-motivated-exercise-tips-older-adults",
-                        })
+                        renderFitness(res,data.steps,data.caloriesBurned,data.exercise,'https://www.healthline.com/health/how-to-walk#:~:text=Tips%20for%20walking%20properly%201%20Keep%20your%20head,...%206%20Step%20from%20heel%20to%20toe%20','https://www.nia.nih.gov/health/staying-motivated-exercise-tips-older-adults')
                     }
             }
         }else{
-            res.render('fitness.ejs',{
-                steps: "Not Submitted Today",
-                calories:"Not Submitted Today" ,
-                active:"Not Submitted Today",
-                link1:'',
-                link2:'',
-                })
+                renderFitness(res,"Not Submitted Today","Not Submitted Today","Not Submitted Today",'','')
             }
         }
     })
@@ -300,7 +253,39 @@ app1.post('/user/fitness/submitFitnessData',isAuth,function(req,res){
     })
 })
         
-app1.get('/user/diet',isAuth, async function(req,res){
+
+
+function renderDiet(response,mealNo,calories,alcohol,link1,link2,){
+    response.render('diet.ejs',{
+        numOfMeals:mealNo,
+        calInt:calories,
+        alcCon: alcohol,
+        link1:link1,
+        link2:link2
+    })
+}
+
+function renderFitness(response,steps,calBurned,exercise,link1,link2,){
+    response.render('fitness.ejs',{
+        steps: steps,
+        calories:calBurned,
+        active:exercise,
+        link1:link1,
+        link2:link2,
+    })
+}
+
+function renderWellness(response,rate,sleep,social,link1,link2,){
+    response.render('wellness.ejs',{
+        rating: rate,
+        sleepHrs:sleep,
+        social:social,
+        link1:link1,
+        link2:link2,
+    })
+}
+
+app1.get('/user/diet',isAuth, function(req,res){
 var date = new Date()
 dietData.findOne({email:req.user.email,date:date.getFullYear().toString() + date.getDate().toString() + (date.getMonth()+1).toString()},(err,data)=>{
     if(err){
@@ -309,87 +294,32 @@ dietData.findOne({email:req.user.email,date:date.getFullYear().toString() + date
         if(data!= null){
             if(data.calIntake < 1500){//calories under 1500
                 if(data.alcConsumed < 3){// under eating but drinking in moderation
-                    res.render('diet.ejs',{
-                        numOfMeals: data.mealNo,
-                        calInt:data.calIntake,
-                        alcCon:data.alcConsumed,
-                        link1:"https://www.healthline.com/nutrition/1500-calorie-diet",
-                        link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
-                    
-                        
-                    })
+                    renderDiet(res,data.mealNo,data.calIntake,data.alcConsumed,'https://www.healthline.com/nutrition/1500-calorie-diet',"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation")
                 }else{// under eating and drinking a lot
-                    res.render('diet.ejs',{
-                        numOfMeals: data.mealNo,
-                        calInt:data.calIntake,
-                        alcCon:data.alcConsumed,
-                        link1:"https://www.healthline.com/nutrition/1500-calorie-diet",
-                        link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
-                    })
+                    renderDiet(res,data.mealNo,data.calIntake,data.alcConsumed,'https://www.healthline.com/nutrition/1500-calorie-diet',"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm")
                 }
             }else if(data.calIntake < 2500 && data.calIntake > 1500){ // eating the right amount of calories 
                 if(data.alcConsumed < 3){//eating right and low drinking
-                    res.render('diet.ejs',{
-                        numOfMeals: data.mealNo,
-                        calInt:data.calIntake,
-                        alcCon:data.alcConsumed,
-                        link1:"https://www.who.int/initiatives/behealthy/healthy-diet",
-                        link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
-                    })
-                
+                    renderDiet(res,data.mealNo,data.calIntake,data.alcConsumed,'https://www.who.int/initiatives/behealthy/healthy-diet',"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation")
                 
                 }else{//eating right but overdrinking
-                    res.render('diet.ejs',{
-                        numOfMeals: data.mealNo,
-                        calInt:data.calIntake,
-                        alcCon:data.alcConsumed,
-                        link1:"https://www.who.int/initiatives/behealthy/healthy-diet",
-                        link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
-                    })
-
+                    renderDiet(res,data.mealNo,data.calIntake,data.alcConsumed,'https://www.who.int/initiatives/behealthy/healthy-diet',"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm")
                 }
                 
             }
             else{//more than 2500 calories
                     if(data.alcConsumed < 3){//over eating but drinking in moderation
-                        res.render('diet.ejs',{
-                            numOfMeals: data.mealNo,
-                            calInt:data.calIntake,
-                            alcCon:data.alcConsumed,
-                            link1:"https://www.livestrong.com/article/478687-the-effects-of-too-many-calories/",
-                            link2:"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation",
-      
-                        })
-                    
+                        renderDiet(res,data.mealNo,data.calIntake,data.alcConsumed,'https://www.livestrong.com/article/478687-the-effects-of-too-many-calories/',"https://health.gov/myhealthfinder/health-conditions/heart-health/drink-alcohol-only-moderation")
                     }else{ // over eating and over drinking
-                        res.render('diet.ejs',{
-                            numOfMeals: data.mealNo,
-                            calInt:data.calIntake,
-                            alcCon:data.alcConsumed,
-                            link1:'https://www.livestrong.com/article/478687-the-effects-of-too-many-calories/',
-                            link2:"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm",
-                        
-                            
-                        })
-    
-    
+                        renderDiet(res,data.mealNo,data.calIntake,data.alcConsumed,'https://www.livestrong.com/article/478687-the-effects-of-too-many-calories/',"https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm")
                     }
     
                 }
 
         }else{
-        res.render('diet.ejs',{
-            numOfMeals: "Not Submitted for today",
-            calInt:"Not Submitted for today",
-            alcCon:"Not Submitted for today",
-            link1:"",
-            link2:"",
-                
-            })
+            renderDiet(res,"Not Submitted for today","Not Submitted for today","Not Submitted for today",'',"")    
         }
         }
-        
-
     })})
 
 app1.post('/user/diet/submitDietData',(req,res)=>{
@@ -428,37 +358,28 @@ app1.post('/login',passport.authenticate('local',
 
 }))
 
-function cleanInput(userInput){
-    var cleanText = sanitizeHtml(userInput,{
-        allowedTags:[],
-        allowedAttributes:{}
-    })
-
-    return cleanText
-}
-
-function isAuth(req,res,next){
-    if(req.isAuthenticated()){
-        return next()
-    }else{
-        res.redirect('/login')
-    }
-
-
-}
-
 
 app1.get('/logout',function(req,res,next){
     req.logout(err=>{
         if(err){
             res.send(err)
         }else{
-            res.redirect('/') 
+            req.session.destroy(err=>{
+                if(err){console.log(err)}
+                else{
+                    res.redirect('/') 
+
+                }
+
+            })
+            
         }
 
     })
    
 })
+
+
 
 app1.listen(port,function(err){
     if(err){console.log(err)}
