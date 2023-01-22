@@ -26,6 +26,10 @@ subBtn.addEventListener('click', event =>{
                 errEmail.innerHTML = 'There are no Accounts associated to ' + email.value
                 errEmail.style.color = 'red'
                 errCount+=1
+            }else{
+                errEmail.innerHTML =''
+                
+
             }
         }else{
             console.log('error with request')

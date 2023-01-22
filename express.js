@@ -253,8 +253,6 @@ app1.post('/user/fitness/submitFitnessData',isAuth,function(req,res){
     })
 })
         
-
-
 function renderDiet(response,mealNo,calories,alcohol,link1,link2,){
     response.render('diet.ejs',{
         numOfMeals:mealNo,
