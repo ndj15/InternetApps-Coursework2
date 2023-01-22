@@ -360,7 +360,7 @@ app1.post('/login',passport.authenticate('local',
 
 
 app1.get('/logout',function(req,res){
-    req.logOut(err=>{
+    req.logout(err=>{
         if(err){
             console.log(err)
         }
